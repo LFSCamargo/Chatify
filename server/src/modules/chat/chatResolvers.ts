@@ -1,5 +1,5 @@
 import chatModel, { Chat } from './chatModel'
-import userModel, { Roles } from '../user/userModel'
+import userModel from '../user/userModel'
 import { GraphQLContext } from '../../graphqlTypes'
 import { SUBSCRIPTION_TRIGGERS } from '../../constants/const'
 
@@ -109,10 +109,6 @@ export default {
     chats: async (root, { search, after, limit }: Connection, { user }: GraphQLContext) => {
       if (!user) {
         throw new Error('You are not authenticated')
-      }
-
-      if (user.role === Roles.COMMON) {
-        throw new Error('You dont have permissions to get all of your chats')
       }
 
       const args = search
