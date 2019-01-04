@@ -1,0 +1,16 @@
+
+version: "2"
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: "mongodb"
+    ports:
+        - 27017:27017
+  app:
+    build: 
+      context: .
+    container_name: "fastify-ts"
+    environment:
+      MONGO: "mongodb://mongodb:27017/server"
+    ports:
+      - 3000:3000
