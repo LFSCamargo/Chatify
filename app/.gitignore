@@ -1,3 +1,7 @@
+# Apollo codegen
+#
+__generated__/
+
 # OSX
 #
 .DS_Store
