@@ -27,6 +27,25 @@ const ChatifyText = styled.Text`
   margin-bottom: 20;
 `
 
+const Fab = styled.TouchableOpacity`
+  width: 65;
+  height: 65;
+  border-radius: ${65 / 2};
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  right: 20;
+  bottom: 20;
+  background-color: ${({ theme }) => theme.colors.accent};
+`
+
+const PlusIcon = styled.Image.attrs({
+  source: ({ theme }) => theme.images.add,
+})`
+  width: 22;
+  height: 22;
+`
+
 const ButtonWrapper = styled.TouchableOpacity`
   padding: 18px 40px;
   align-items: center;
@@ -227,6 +246,9 @@ const ChatList = (props: Props) => {
         renderItem={({ item }) => renderItem(item)}
         onEndReached={onEndReached}
       />
+      <Fab onPress={() => props.navigation.navigate(Routes.AddChat)}>
+        <PlusIcon />
+      </Fab>
     </Wrapper>
   )
 }
