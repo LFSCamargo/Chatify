@@ -18,7 +18,7 @@ const { width } = Dimensions.get('window')
 
 const Wrapper = styled(SafeAreaView)`
   flex: 1;
-  backgroundcolor: ${({ theme }) => theme.colors.primary};
+  background-color: ${({ theme }) => theme.colors.primary};
   align-items: center;
 `
 

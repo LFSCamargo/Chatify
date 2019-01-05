@@ -4,7 +4,7 @@ import styled from 'styled-components/native'
 
 const Wrapper = styled(SafeAreaView)`
   flex: 1;
-  backgroundcolor: ${({ theme }) => theme.colors.primary};
+  background-color: ${({ theme }) => theme.colors.primary};
 `
 
 const ChatWrapper = () => {
