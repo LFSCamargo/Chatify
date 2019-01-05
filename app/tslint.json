@@ -9,6 +9,7 @@
   "jsRules": {},
   "rules": {
     "ordered-imports": false,
+    "jsx-no-lambda": false,
     "curly": false,
     "function-name": false,
     "import-name": false,
