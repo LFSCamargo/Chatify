@@ -11,6 +11,8 @@ export default gql`
     _id: String
     messages: [Message]
     users: [User]
+    createdAt: String
+    updatedAt: String
   }
   type ChatMutationOutput {
     chat: Chat
