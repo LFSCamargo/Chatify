@@ -89,6 +89,7 @@ export default {
       ]
 
       await chat.update({
+        updatedAt: new Date(),
         messages: newMessages,
       })
 
@@ -111,18 +112,16 @@ export default {
         throw new Error('You are not authenticated')
       }
 
-      const args = search
-        ? {
-            users: [search],
-          }
-        : {}
+      const args = {
+          users: { $in : [user._id]},
+        }
 
       if (!after) {
-        const edges = await chatModel.find(args).limit(limit)
+        const edges = await chatModel.find(args).sort({ updatedAt: -1 })
         const count = await chatModel
           .find(args)
           .limit(limit)
-          .count()
+          .count().sort({ updatedAt: -1 })
         return {
           count,
           edges,
@@ -132,11 +131,11 @@ export default {
       const edges = await chatModel
         .find(args)
         .limit(limit)
-        .skip(after)
+        .skip(after).sort({ updatedAt: -1 })
       const count = await chatModel
         .find(args)
         .limit(limit)
-        .skip(after)
+        .skip(after).sort({ updatedAt: -1 })
         .count()
       return {
         count,
