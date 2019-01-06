@@ -8,7 +8,7 @@ import { ChatScreenQuery_me, ChatScreenQuery_chat } from './__generated__/ChatSc
 import gql from 'graphql-tag'
 import idx from 'idx'
 import { gravatarURL } from '../../config/utils'
-import Mutation, { MutationResult } from './SendMessageMutation'
+import Mutation, { MutationResult } from './mutations/SendMessageMutation'
 import { GiftedChat, BubbleProps, InputToolbar } from 'react-native-gifted-chat'
 
 const { width } = Dimensions.get('window')

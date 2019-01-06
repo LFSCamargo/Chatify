@@ -190,6 +190,8 @@ const ChatList = (props: Props) => {
   const renderItem = (item: ChatListQuery_chats_edges) => {
     const { _id, users, updatedAt, lastMessage } = item
     const user = (users || []).filter(element => element && element._id !== me._id)[0]
+
+    const formattedNameArr = (user && (user.name || '').split(' ')) || []
     return (
       <TouchableOpacity
         onPress={() =>
@@ -203,7 +205,11 @@ const ChatList = (props: Props) => {
           <AvatarAndText>
             <UsersProfile source={{ uri: gravatarURL((user && user.email) || '') }} />
             <TextContainer>
-              <ContactName>{user && user.name}</ContactName>
+              <ContactName>
+                {formattedNameArr.length !== 1
+                  ? `${formattedNameArr[0]} ${formattedNameArr[1]}`
+                  : user && user.name}
+              </ContactName>
               <SmallText>{renderMessage(lastMessage || '')}</SmallText>
             </TextContainer>
           </AvatarAndText>
@@ -229,7 +235,7 @@ const ChatList = (props: Props) => {
         updateQuery: (previousResult, { fetchMoreResult }) => {
           return {
             ...previousResult,
-            events: fetchMoreResult.events,
+            chats: fetchMoreResult.chats,
           }
         },
       })
@@ -315,7 +321,13 @@ const ChatList = (props: Props) => {
         onEndReached={onEndReached}
         extraData={props.data}
       />
-      <Fab onPress={() => props.navigation.navigate(Routes.AddChat)}>
+      <Fab
+        onPress={() =>
+          props.navigation.navigate(Routes.AddChat, {
+            refecth: props.data.refetch,
+          })
+        }
+      >
         <PlusIcon />
       </Fab>
     </Wrapper>

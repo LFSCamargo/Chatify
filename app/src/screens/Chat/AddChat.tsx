@@ -1,13 +1,26 @@
 import * as React from 'react'
 import * as Apollo from 'react-apollo-hooks'
-import { SafeAreaView, ActivityIndicator, TouchableOpacity, Alert, Dimensions } from 'react-native'
+import {
+  SafeAreaView,
+  ActivityIndicator,
+  TouchableOpacity,
+  FlatList,
+  Dimensions,
+} from 'react-native'
 import styled from 'styled-components/native'
 import { NavigationInjectedProps } from 'react-navigation'
 import { GraphqlQueryControls, graphql } from 'react-apollo'
-import { ChatScreenQuery_me, ChatScreenQuery_chat } from './__generated__/ChatScreenQuery'
+import {
+  AddChatQuery_me,
+  AddChatQuery_users,
+  AddChatQuery_users_edges,
+} from './__generated__/AddChatQuery'
 import gql from 'graphql-tag'
 import idx from 'idx'
 import { gravatarURL } from '../../config/utils'
+import AddChatMutation from './mutations/AddChatMutation'
+
+const { width } = Dimensions.get('window')
 
 const Wrapper = styled(SafeAreaView)`
   flex: 1;
@@ -114,22 +127,124 @@ const SearchIcon = styled.Image.attrs({
   height: 22;
 `
 
-interface Data extends GraphqlQueryControls {
-  me: ChatScreenQuery_me
-  chat: ChatScreenQuery_chat
-}
+const UserCard = styled.View`
+  width: ${width - 30};
+  margin: 10px 15px;
+  height: 70;
+  padding: 10px;
+  border-radius: 10;
+  background-color: ${({ theme }) => theme.colors.lighter};
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+`
+
+const ProfilePicture = styled.Image`
+  width: 50;
+  height: 50;
+  border-radius: 25;
+  margin-right: 10;
+`
+
+const UserName = styled.Text`
+  font-size: 18;
+  font-family: 'Rubik';
+  color: white;
+`
+
+const Button = styled.TouchableOpacity`
+  padding: 5px 10px;
+  background-color: ${({ theme }) => theme.colors.accent};
+  align-items: center;
+  justify-content: center;
+  border-radius: 100px;
+`
+
+const AddButtonText = styled.Text`
+  font-size: 12;
+  font-family: 'Rubik';
+  color: white;
+`
 
 interface Params {
-  _id: string
-  userId: string
+  refetch: () => void
+}
+
+interface Data extends GraphqlQueryControls {
+  me: AddChatQuery_me
+  users: AddChatQuery_users
 }
 
 interface Props extends NavigationInjectedProps<Params> {
   data: Data
 }
 
-const ChatScreen = (props: Props) => {
-  const { loading, error, me } = props.data
+const AddChat = (props: Props) => {
+  const { loading, error, me, users } = props.data
+  const [search, setSearch] = React.useState('')
+  const [isFetchingEnd, setFetchingEnd] = React.useState(false)
+  const addChat = Apollo.useMutation(AddChatMutation)
+
+  const searchUser = () => {
+    props.data.refetch({
+      search,
+    })
+  }
+
+  const addNewChat = (id: string) => {
+    addChat({
+      variables: {
+        id,
+      },
+      refetchQueries: ['ChatListQuery'],
+    }).then(() => {
+      props.navigation.goBack()
+    })
+  }
+
+  const onEndReached = () => {
+    if (isFetchingEnd) {
+      return
+    }
+    setFetchingEnd(true)
+
+    const count = (users && users.count) || 10
+
+    const more = count + 10
+
+    return props.data
+      .fetchMore({
+        variables: { first: more },
+        updateQuery: (previousResult, { fetchMoreResult }) => {
+          return {
+            ...previousResult,
+            users: fetchMoreResult.users,
+          }
+        },
+      })
+      .then(() => setFetchingEnd(false))
+  }
+
+  const renderItem = (item: AddChatQuery_users_edges | null) => {
+    const email = idx(item, _ => _.email) || ''
+    const name = idx(item, _ => _.name) || ''
+
+    const formattedNameArr = name.split(' ')
+
+    return (
+      <UserCard>
+        <Row>
+          <ProfilePicture source={{ uri: gravatarURL(email) }} />
+          <UserName>
+            {formattedNameArr.length !== 1 ? `${formattedNameArr[0]} ${formattedNameArr[1]}` : name}
+          </UserName>
+        </Row>
+        <Button onPress={() => addNewChat((item && item._id) || '')}>
+          <AddButtonText>Chat</AddButtonText>
+        </Button>
+      </UserCard>
+    )
+  }
 
   if (loading) {
     return (
@@ -165,28 +280,40 @@ const ChatScreen = (props: Props) => {
         </Row>
         <UserProfile source={{ uri: gravatarURL(me.email || '') }} />
       </Header>
-      <HeaderRow>
-        <Input />
-        <SearchIcon />
-      </HeaderRow>
+      <FlatList
+        onEndReached={onEndReached}
+        keyExtractor={item => idx(item, _ => _._id) || ''}
+        data={users.edges || []}
+        ListHeaderComponent={
+          <HeaderRow>
+            <Input onChangeText={setSearch} onBlur={searchUser} value={search} />
+            <TouchableOpacity onPress={searchUser}>
+              <SearchIcon />
+            </TouchableOpacity>
+          </HeaderRow>
+        }
+        renderItem={({ item }) => renderItem(item)}
+      />
     </Wrapper>
   )
 }
 
 const Query = gql`
-  query AddChatQuery($id: String!) {
+  query AddChatQuery($first: Int = 10, $search: String = "") {
     me {
       _id
-      name
       email
+      name
+    }
+    users(first: $first, search: $search) {
+      count
+      edges {
+        _id
+        name
+        email
+      }
     }
   }
 `
-
-export default graphql(Query, {
-  options: (props: Props) => ({
-    variables: {
-      id: idx(props.navigation, _ => _.state.params._id) || '',
-    },
-  }),
-})(ChatScreen)
+// @ts-ignore
+export default graphql(Query)(AddChat)
