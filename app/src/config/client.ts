@@ -1,3 +1,4 @@
+import { GRAPHQL_URI, SUBSCRIPTIONS_URI } from './config'
 import { AsyncStorage } from 'react-native'
 import { ApolloClient } from 'apollo-client'
 import { createHttpLink } from 'apollo-link-http'
@@ -8,14 +9,14 @@ import { split } from 'apollo-client-preset'
 import { getMainDefinition } from 'apollo-utilities'
 
 const wsLink = new WebSocketLink({
-  uri: 'ws://localhost:5000/graphql',
+  uri: SUBSCRIPTIONS_URI,
   options: {
     reconnect: true,
   },
 })
 
 const httpLink = createHttpLink({
-  uri: 'http://localhost:5000/graphql',
+  uri: GRAPHQL_URI,
 })
 
 const authLink = setContext(async (_, { headers }) => {
