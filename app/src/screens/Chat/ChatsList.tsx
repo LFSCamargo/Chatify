@@ -1,8 +1,9 @@
 import * as React from 'react'
-import { SafeAreaView, ActivityIndicator, FlatList, TouchableOpacity } from 'react-native'
+import { SafeAreaView, ActivityIndicator, FlatList, TouchableOpacity, Alert } from 'react-native'
 import { graphql, GraphqlQueryControls } from 'react-apollo'
 import gql from 'graphql-tag'
 import idx from 'idx'
+import * as R from 'ramda'
 import moment from 'moment'
 import styled from 'styled-components/native'
 import { NavigationInjectedProps } from 'react-navigation'
@@ -13,6 +14,7 @@ import {
 } from './__generated__/ChatListQuery'
 import { gravatarURL } from '../../config/utils'
 import { Routes } from '../../config/Router'
+// import { element } from 'prop-types';
 
 const Wrapper = styled(SafeAreaView)`
   flex: 1;
@@ -108,23 +110,6 @@ const MeProfile = styled.Image`
   border-radius: 6;
 `
 
-const Input = styled.TextInput.attrs({
-  underlineColorAndroid: 'transparent',
-  placeholderTextColor: ({ theme }) => theme.colors.grey,
-  placeholder: 'Search for a user here...',
-})`
-  color: ${({ theme }) => theme.colors.grey};
-  font-size: 17;
-  width: 80%;
-`
-
-const SearchIcon = styled.Image.attrs({
-  source: ({ theme }) => theme.images.search,
-})`
-  width: 21;
-  height: 22;
-`
-
 const AvatarAndText = styled.View`
   flex-direction: row;
   align-items: center;
@@ -157,6 +142,31 @@ interface Data extends GraphqlQueryControls {
   chats: ChatListQuery_chats
 }
 
+const CHAT_SUBSCRIPTION = gql`
+  subscription ChatListSubscription($id: String!) {
+    messageReceived(yourUser: $id) {
+      notificationMessage
+      chat {
+        updatedAt
+        lastMessage
+        _id
+        users {
+          _id
+          email
+          name
+        }
+        messages {
+          message
+          createdAt
+          user {
+            _id
+          }
+        }
+      }
+    }
+  }
+`
+
 interface Props extends NavigationInjectedProps {
   data: Data
 }
@@ -165,15 +175,27 @@ const ChatList = (props: Props) => {
   const { loading, error, me, chats } = props.data
   const [isFetchingEnd, setFetchingEnd] = React.useState(false)
 
+  const renderMessage = (message: string | null | undefined) => {
+    if (!message) {
+      return 'Chat created ✨'
+    }
+
+    if (message.length > 30) {
+      return `${message.substring(0.3)}...`
+    }
+
+    return message
+  }
+
   const renderItem = (item: ChatListQuery_chats_edges) => {
-    const { _id, messages, users, updatedAt } = item
-    const lastMessage = idx(messages, _ => _[0])
+    const { _id, users, updatedAt, lastMessage } = item
     const user = (users || []).filter(element => element && element._id !== me._id)[0]
     return (
       <TouchableOpacity
         onPress={() =>
           props.navigation.navigate(Routes.ChatScreen, {
             _id,
+            userId: me._id,
           })
         }
       >
@@ -182,7 +204,7 @@ const ChatList = (props: Props) => {
             <UsersProfile source={{ uri: gravatarURL((user && user.email) || '') }} />
             <TextContainer>
               <ContactName>{user && user.name}</ContactName>
-              <SmallText>{(lastMessage && lastMessage.message) || 'Chat created ✨'}</SmallText>
+              <SmallText>{renderMessage(lastMessage || '')}</SmallText>
             </TextContainer>
           </AvatarAndText>
           <SmallText>{moment(updatedAt || '').fromNow()}</SmallText>
@@ -234,6 +256,52 @@ const ChatList = (props: Props) => {
     )
   }
 
+  props.data.subscribeToMore({
+    document: CHAT_SUBSCRIPTION,
+    variables: {
+      id: me._id,
+    },
+    onError: error => console.log('Subscription Error: ', error),
+    updateQuery: (previous, { subscriptionData }) => {
+      const updatedChat = subscriptionData.data.messageReceived.chat
+
+      const edges = (idx(previous.chats, _ => _.edges) || []).map((element: any) => ({
+        _id: element._id,
+      }))
+
+      const obj = {
+        _id: updatedChat._id,
+      }
+
+      const existsOnEdges = R.includes(obj, edges)
+
+      if (existsOnEdges) {
+        const filtered = previous.chats.edges.filter(
+          (element: any) => element._id !== updatedChat._id,
+        )
+        return {
+          ...previous,
+          chats: {
+            ...previous.chats,
+            edges: [updatedChat, ...filtered],
+          },
+        }
+      }
+
+      if (!existsOnEdges) {
+        return {
+          ...previous,
+          chats: {
+            ...previous.chats,
+            edges: [updatedChat, ...previous.chats.edges],
+          },
+        }
+      }
+
+      return previous
+    },
+  })
+
   return (
     <Wrapper>
       <Header>
@@ -245,6 +313,7 @@ const ChatList = (props: Props) => {
         keyExtractor={item => item._id}
         renderItem={({ item }) => renderItem(item)}
         onEndReached={onEndReached}
+        extraData={props.data}
       />
       <Fab onPress={() => props.navigation.navigate(Routes.AddChat)}>
         <PlusIcon />
@@ -253,7 +322,7 @@ const ChatList = (props: Props) => {
   )
 }
 
-const Query = gql`
+export const ListQuery = gql`
   query ChatListQuery($first: Int = 10) {
     me {
       _id
@@ -265,6 +334,7 @@ const Query = gql`
       edges {
         updatedAt
         _id
+        lastMessage
         users {
           _id
           email
@@ -282,4 +352,4 @@ const Query = gql`
   }
 `
 // @ts-ignore
-export default graphql(Query)(ChatList)
+export default graphql(ListQuery)(ChatList)
