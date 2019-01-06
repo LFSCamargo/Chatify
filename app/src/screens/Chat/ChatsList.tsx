@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { SafeAreaView, ActivityIndicator, FlatList, TouchableOpacity, Alert } from 'react-native'
+import { SafeAreaView, ActivityIndicator, FlatList, TouchableOpacity } from 'react-native'
 import { graphql, GraphqlQueryControls } from 'react-apollo'
 import gql from 'graphql-tag'
 import idx from 'idx'
@@ -63,11 +63,29 @@ const ButtonText = styled.Text`
   font-family: 'Rubik';
 `
 
+const EmptyText = styled.Text`
+  font-family: 'Rubik';
+  color: white;
+  font-size: 20;
+  margin-top: -20;
+  margin-bottom: 20;
+  margin: 40px;
+  text-align: center;
+`
+
 const Logo = styled.Image.attrs({
   source: ({ theme }) => theme.images.logo,
 })`
   width: 400;
   height: 180;
+`
+
+const LogoEmpty = styled.Image.attrs({
+  source: ({ theme }) => theme.images.logo,
+})`
+  width: 400;
+  height: 100;
+  margin-top: 100;
 `
 
 const AlignAtCenter = styled.View`
@@ -320,6 +338,12 @@ const ChatList = (props: Props) => {
         renderItem={({ item }) => renderItem(item)}
         onEndReached={onEndReached}
         extraData={props.data}
+        ListEmptyComponent={
+          <AlignAtCenter>
+            <LogoEmpty />
+            <EmptyText>You have no chats start chating clicking on the plus button 😀</EmptyText>
+          </AlignAtCenter>
+        }
       />
       <Fab
         onPress={() =>
