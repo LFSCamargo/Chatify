@@ -91,6 +91,7 @@ export default {
       await chat.update({
         updatedAt: new Date(),
         messages: newMessages,
+        lastMessage: message,
       })
 
       const afterMutateChat = await chatModel.findOne({ _id })

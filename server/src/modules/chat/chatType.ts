@@ -11,6 +11,7 @@ export default gql`
     _id: String
     messages: [Message]
     users: [User]
+    lastMessage: String
     createdAt: String
     updatedAt: String
   }

@@ -38,6 +38,10 @@ const Schema = new mongoose.Schema(
       type: [String],
       required: true,
     },
+    lastMessage: {
+      type: String,
+      required: false,
+    }
   },
   {
     collection: 'chat',
