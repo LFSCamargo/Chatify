@@ -6,8 +6,10 @@ import {
   TouchableOpacity,
   FlatList,
   Dimensions,
+  Platform,
 } from 'react-native'
 import styled from 'styled-components/native'
+import KeyboardSpacer from 'react-native-keyboard-spacer'
 import { NavigationInjectedProps } from 'react-navigation'
 import { GraphqlQueryControls, graphql } from 'react-apollo'
 import {
@@ -284,6 +286,7 @@ const AddChat = (props: Props) => {
         onEndReached={onEndReached}
         keyExtractor={item => idx(item, _ => _._id) || ''}
         data={users.edges || []}
+        ListFooterComponent={Platform.OS === 'ios' ? <KeyboardSpacer /> : null}
         ListHeaderComponent={
           <HeaderRow>
             <Input onChangeText={setSearch} onBlur={searchUser} value={search} />

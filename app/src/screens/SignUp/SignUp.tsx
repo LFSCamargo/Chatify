@@ -8,14 +8,26 @@ import {
   Alert,
   AsyncStorage,
   Keyboard,
-  TouchableOpacity,
 } from 'react-native'
 import styled from 'styled-components/native'
 import { NavigationInjectedProps } from 'react-navigation'
 import gql from 'graphql-tag'
 import { Routes } from '../../config/Router'
+import KeyboardSpacer from 'react-native-keyboard-spacer'
 
 const { width } = Dimensions.get('window')
+
+const Container = styled.View`
+  flex: 1;
+`
+
+const ScrollWrapper = styled.ScrollView.attrs({
+  contentContainerStyle: {
+    alignItems: 'center',
+  },
+})`
+  background-color: ${({ theme }) => theme.colors.primary};
+`
 
 const Wrapper = styled(SafeAreaView)`
   flex: 1;
@@ -77,7 +89,7 @@ const BackArrow = styled.Image.attrs({
 `
 
 const Header = styled.View`
-  width: 100%;
+  width: ${width};
   flex-direction: row;
 `
 
@@ -85,13 +97,6 @@ const BackWrapper = styled.TouchableOpacity`
   margin-left: 20;
   margin-top: 20;
   z-index: 1000;
-`
-
-const KeyboardWrapper = styled.KeyboardAvoidingView.attrs({
-  enabled: true,
-  behavior: Platform.OS === 'ios' ? 'padding' : 'height',
-})`
-  flex: 1;
 `
 
 const LOGIN = gql`
@@ -148,30 +153,38 @@ const SignUp = (props: Props) => {
   }
 
   return (
-    <KeyboardWrapper>
-      <Wrapper>
-        <Header>
-          <BackWrapper onPress={() => props.navigation.goBack()}>
-            <BackArrow />
-          </BackWrapper>
-        </Header>
-        <Logo />
-        <ChatifyText>Chatify</ChatifyText>
-        <Input value={name} onChangeText={setName} placeholder="Full Name" autoCapitalize="none" />
-        <Input value={email} onChangeText={setEmail} placeholder="Email" autoCapitalize="none" />
-        <Input
-          value={password}
-          onChangeText={setPassword}
-          placeholder="Password"
-          secureTextEntry
-          autoCapitalize="none"
-        />
-        <ButtonWrapper onPress={register}>
-          {loading && <ActivityIndicator animating color="white" />}
-          {!loading && <ButtonText>Sign Up</ButtonText>}
-        </ButtonWrapper>
-      </Wrapper>
-    </KeyboardWrapper>
+    <Container>
+      <ScrollWrapper>
+        <Wrapper>
+          <Header>
+            <BackWrapper onPress={() => props.navigation.goBack()}>
+              <BackArrow />
+            </BackWrapper>
+          </Header>
+          <Logo />
+          <ChatifyText>Chatify</ChatifyText>
+          <Input
+            value={name}
+            onChangeText={setName}
+            placeholder="Full Name"
+            autoCapitalize="none"
+          />
+          <Input value={email} onChangeText={setEmail} placeholder="Email" autoCapitalize="none" />
+          <Input
+            value={password}
+            onChangeText={setPassword}
+            placeholder="Password"
+            secureTextEntry
+            autoCapitalize="none"
+          />
+          <ButtonWrapper onPress={register}>
+            {loading && <ActivityIndicator animating color="white" />}
+            {!loading && <ButtonText>Sign Up</ButtonText>}
+          </ButtonWrapper>
+        </Wrapper>
+      </ScrollWrapper>
+      {Platform.OS === 'ios' && <KeyboardSpacer />}
+    </Container>
   )
 }
 

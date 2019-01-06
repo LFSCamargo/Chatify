@@ -198,7 +198,7 @@ const ChatList = (props: Props) => {
     }
 
     if (message.length > 30) {
-      return `${message.substring(0.3)}...`
+      return `${message.substring(0, 30)}...`
     }
 
     return message

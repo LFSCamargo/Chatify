@@ -13,8 +13,21 @@ import styled from 'styled-components/native'
 import { NavigationInjectedProps } from 'react-navigation'
 import gql from 'graphql-tag'
 import { Routes } from '../../config/Router'
+import KeyboardSpacer from 'react-native-keyboard-spacer'
 
 const { width } = Dimensions.get('window')
+
+const Container = styled.View`
+  flex: 1;
+`
+
+const ScrollWrapper = styled.ScrollView.attrs({
+  contentContainerStyle: {
+    alignItems: 'center',
+  },
+})`
+  background-color: ${({ theme }) => theme.colors.primary};
+`
 
 const Wrapper = styled(SafeAreaView)`
   flex: 1;
@@ -111,7 +124,7 @@ const Login = (props: Props) => {
     setLoading(true)
     Keyboard.dismiss()
 
-    if (!email || !password || !name) {
+    if (!email || !password) {
       setLoading(false)
       return Alert.alert('Error', 'Please fill all the fields to continue')
     }
@@ -141,27 +154,30 @@ const Login = (props: Props) => {
   }
 
   return (
-    <KeyboardWrapper>
-      <Wrapper>
-        <Logo />
-        <ChatifyText>Chatify</ChatifyText>
-        <Input value={email} onChangeText={setEmail} placeholder="Email" autoCapitalize="none" />
-        <Input
-          value={password}
-          onChangeText={setPassword}
-          placeholder="Password"
-          secureTextEntry
-          autoCapitalize="none"
-        />
-        <ButtonWrapper onPress={login}>
-          {loading && <ActivityIndicator animating color="white" />}
-          {!loading && <ButtonText>Login</ButtonText>}
-        </ButtonWrapper>
-        <OutlineButtonWrapper onPress={() => props.navigation.navigate(Routes.SignUp)}>
-          <OutlineButtonText>Sign Up</OutlineButtonText>
-        </OutlineButtonWrapper>
-      </Wrapper>
-    </KeyboardWrapper>
+    <Container>
+      <ScrollWrapper>
+        <Wrapper>
+          <Logo />
+          <ChatifyText>Chatify</ChatifyText>
+          <Input value={email} onChangeText={setEmail} placeholder="Email" autoCapitalize="none" />
+          <Input
+            value={password}
+            onChangeText={setPassword}
+            placeholder="Password"
+            secureTextEntry
+            autoCapitalize="none"
+          />
+          <ButtonWrapper onPress={login}>
+            {loading && <ActivityIndicator animating color="white" />}
+            {!loading && <ButtonText>Login</ButtonText>}
+          </ButtonWrapper>
+          <OutlineButtonWrapper onPress={() => props.navigation.navigate(Routes.SignUp)}>
+            <OutlineButtonText>Sign Up</OutlineButtonText>
+          </OutlineButtonWrapper>
+        </Wrapper>
+      </ScrollWrapper>
+      {Platform.OS === 'ios' && <KeyboardSpacer />}
+    </Container>
   )
 }
 

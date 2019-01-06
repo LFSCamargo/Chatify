@@ -346,7 +346,7 @@ const ChatScreen = (props: Props) => {
       createdAt: element.createdAt,
       user: {
         _id: element.user._id,
-        name: element.user.name,
+        name: element.user && element.user.name,
         avatar: gravatarURL(element.user.email),
       },
     }
@@ -362,9 +362,9 @@ const ChatScreen = (props: Props) => {
           >
             <BackArrow />
           </TouchableOpacity>
-          <HeaderTitle>{user.name.split(' ')[0]}</HeaderTitle>
+          <HeaderTitle>{(user && user.name.split(' ')[0]) || ''}</HeaderTitle>
         </Row>
-        <UserProfile source={{ uri: gravatarURL(user.email) }} />
+        <UserProfile source={{ uri: gravatarURL((user && user.email) || '') }} />
       </Header>
       <CustomGiftedChat
         text={message}
