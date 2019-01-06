@@ -14,7 +14,6 @@ import {
 } from './__generated__/ChatListQuery'
 import { gravatarURL } from '../../config/utils'
 import { Routes } from '../../config/Router'
-// import { element } from 'prop-types';
 
 const Wrapper = styled(SafeAreaView)`
   flex: 1;
