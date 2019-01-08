@@ -30,7 +30,7 @@ const App = () => {
       <ApolloHooksProvider client={client}>
         <ThemeProvider theme={Theme}>
           <View style={{ flex: 1 }}>
-            <StatusBar barStyle="light-content" />
+            <StatusBar barStyle="light-content" backgroundColor={Theme.colors.primary} />
             <Router />
           </View>
         </ThemeProvider>
