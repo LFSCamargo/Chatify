@@ -117,7 +117,7 @@ const HeaderTitle = styled.Text`
   color: white;
   font-size: 43;
   font-weight: 500;
-  height: 45;
+  height: 53;
   justify-content: flex-end;
 `
 
