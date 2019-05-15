@@ -1,5 +1,6 @@
 import chatModel, { Chat } from './chatModel'
 import userModel from '../user/userModel'
+import * as R from 'ramda';
 import { GraphQLContext } from '../../graphqlTypes'
 import { SUBSCRIPTION_TRIGGERS } from '../../constants/const'
 
@@ -10,6 +11,13 @@ interface ChatQuery {
 interface SendMessage {
   _id: string
   message: string
+}
+
+interface SendRTCMessage {
+  _id: string
+  message: string
+  type: string
+  callID: string
 }
 
 interface ChatQueryPerUser {
@@ -68,6 +76,33 @@ export default {
 
       return {
         chat: await chatModel.findOne({ _id }),
+      }
+    },
+    sendWebRTCMessage: async (_, { _id, callID, message, type }: SendRTCMessage, { user, pubsub}: GraphQLContext) => {
+      if (!user) {
+        throw new Error('You are not authenticated');
+      }
+
+      const chat = await chatModel.findOne({ _id })
+
+      if (!chat) {
+        throw new Error('This chat does not exists');
+      }
+
+      if (!R.includes(user._id.toString(), chat.users)) {
+        throw new Error('You dont belong to this chat');
+      }
+      
+      pubsub.publish(SUBSCRIPTION_TRIGGERS.WEBRTC_MESSAGE, {
+        fromUser: user._id,
+        chat,
+        callID,
+        type,
+        message,
+      });
+
+      return {
+        message: 'Message sent',
       }
     },
     sendMessage: async (root, { _id, message }: SendMessage, { user, pubsub }: GraphQLContext) => {

@@ -14,8 +14,21 @@ const graphqlTypes = gql`
     notificationMessage: String
   }
 
+  type WebRTCMessage {
+    chat: Chat
+    callID: String
+    type: String
+    message: String
+    fromUser: String
+  }
+
+  type MessageMutation {
+    message: String
+  }
+
   type Subscription {
     messageReceived(yourUser: String!): MessageReceivedSubscription
+    webRTCMessage(yourUser: String!): WebRTCMessage    
   }
 
   type Mutation {
@@ -23,6 +36,7 @@ const graphqlTypes = gql`
     login(email: String, password: String): AuthenticationOutput
 
     # Chat
+    sendWebRTCMessage(_id: String!, callID: String!, message: String!, type: String!): MessageMutation
     sendMessage(_id: String!, message: String!): ChatMutationOutput
     addConversation(otherUser: String!): ChatMutationOutput
   }
