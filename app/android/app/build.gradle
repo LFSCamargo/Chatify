@@ -94,6 +94,10 @@ def enableSeparateBuildPerCPUArchitecture = false
 def enableProguardInReleaseBuilds = false
 
 android {
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
 
@@ -137,7 +141,9 @@ android {
 }
 
 dependencies {
+    compile project(':react-native-callkeep')
     compile project(':react-native-image-resizer')
+    compile project(':WebRTCModule') 
     compile project(':react-native-image-picker')
     compile project(':react-native-gesture-handler')
     compile project(':react-native-fetch-blob')
