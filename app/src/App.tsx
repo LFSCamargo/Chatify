@@ -21,6 +21,7 @@ const App = () => {
 
   React.useEffect(() => {
     getToken()
+    // AsyncStorage.clear();
   }, [])
 
   const Router = createRouter(token)

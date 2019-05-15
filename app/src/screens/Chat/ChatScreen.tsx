@@ -1,6 +1,13 @@
 import * as React from 'react'
 import * as Apollo from 'react-apollo-hooks'
-import { SafeAreaView, ActivityIndicator, TouchableOpacity, Alert, Dimensions } from 'react-native'
+import {
+  SafeAreaView,
+  ActivityIndicator,
+  TouchableOpacity,
+  Alert,
+  Dimensions,
+  StatusBar,
+} from 'react-native'
 import styled from 'styled-components/native'
 import { NavigationInjectedProps } from 'react-navigation'
 import { GraphqlQueryControls, graphql } from 'react-apollo'
@@ -10,6 +17,7 @@ import idx from 'idx'
 import { gravatarURL } from '../../config/utils'
 import Mutation, { MutationResult } from './mutations/SendMessageMutation'
 import { GiftedChat, BubbleProps, InputToolbar } from 'react-native-gifted-chat'
+import { MessageReceived_messageReceived_chat } from './__generated__/MessageReceived'
 
 const { width } = Dimensions.get('window')
 
@@ -322,7 +330,8 @@ const ChatScreen = (props: Props) => {
     },
     onError: error => console.log('Subscription Error: ', error),
     updateQuery: (previous, { subscriptionData }) => {
-      const updatedChat = subscriptionData.data.messageReceived.chat
+      const updatedChat: MessageReceived_messageReceived_chat =
+        subscriptionData.data.messageReceived.chat
 
       if (!updatedChat) {
         return previous
@@ -331,7 +340,10 @@ const ChatScreen = (props: Props) => {
       if (updatedChat._id === chat._id) {
         return {
           ...previous,
-          chat: updatedChat,
+          chat: {
+            ...previous.chat,
+            messages: updatedChat.messages,
+          },
         }
       }
 
@@ -354,6 +366,7 @@ const ChatScreen = (props: Props) => {
 
   return (
     <Wrapper>
+      <StatusBar hidden={false} />
       <Header>
         <Row>
           <TouchableOpacity

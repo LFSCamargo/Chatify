@@ -7,6 +7,7 @@ import {
   FlatList,
   Dimensions,
   Platform,
+  StatusBar,
 } from 'react-native'
 import styled from 'styled-components/native'
 import KeyboardSpacer from 'react-native-keyboard-spacer'
@@ -270,6 +271,7 @@ const AddChat = (props: Props) => {
 
   return (
     <Wrapper>
+      <StatusBar hidden={false} />
       <Header>
         <Row>
           <TouchableOpacity

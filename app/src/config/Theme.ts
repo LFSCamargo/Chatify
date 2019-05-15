@@ -11,5 +11,10 @@ export default {
     add: require('../assets/images/add.png'),
     back: require('../assets/images/back.png'),
     send: require('../assets/images/send.png'),
+    mic: require('../assets/images/micicon.png'),
+    micOff: require('../assets/images/micofficon.png'),
+    video: require('../assets/images/videoicon.png'),
+    videoOff: require('../assets/images/videoofficon.png'),
+    phone: require('../assets/images/phoneicon.png'),
   },
 }

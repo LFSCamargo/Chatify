@@ -10,3 +10,15 @@ export const checkEmoji = (text: string) => {
 
   return emojiRegex.test(text)
 }
+
+export const CALL_TYPES = {
+  REJECT: 'REJECT',
+  BUSY: 'BUSY',
+  DIAL_SDP: 'DIAL_SDP',
+  ANSWER_SDP: 'ANSWER_SDP',
+  ICE_CANDIDATE: 'ICE_CANDIDATE',
+  HANGUP: 'HANGUP',
+  DISABLE_CAMERA: 'DISABLE_CAMERA',
+  ENABLE_CAMERA: 'ENABLE_CAMERA',
+  MUTE_MICROPHONE: 'MUTE_MICROPHONE',
+}

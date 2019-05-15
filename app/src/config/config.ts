@@ -1,2 +1,2 @@
-export const GRAPHQL_URI = 'https://chatify-server.now.sh/graphql'
-export const SUBSCRIPTIONS_URI = 'wss://chatify-server.now.sh/graphql'
+export const GRAPHQL_URI = 'http://localhost:5000/graphql'
+export const SUBSCRIPTIONS_URI = 'ws://localhost:5000/graphql'

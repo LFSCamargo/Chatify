@@ -1,19 +1,28 @@
 import * as React from 'react'
-import { SafeAreaView, ActivityIndicator, FlatList, TouchableOpacity } from 'react-native'
+import {
+  SafeAreaView,
+  ActivityIndicator,
+  FlatList,
+  TouchableOpacity,
+  StatusBar,
+} from 'react-native'
 import { graphql, GraphqlQueryControls } from 'react-apollo'
+import * as Apollo from 'react-apollo-hooks'
 import gql from 'graphql-tag'
 import idx from 'idx'
 import * as R from 'ramda'
 import moment from 'moment'
 import styled from 'styled-components/native'
+import RNCallKit from 'react-native-callkeep'
 import { NavigationInjectedProps } from 'react-navigation'
 import {
   ChatListQuery_me,
   ChatListQuery_chats,
   ChatListQuery_chats_edges,
 } from './__generated__/ChatListQuery'
-import { gravatarURL } from '../../config/utils'
+import { gravatarURL, CALL_TYPES } from '../../config/utils'
 import { Routes } from '../../config/Router'
+import { SendRTCMessageVariables } from './__generated__/SendRTCMessage'
 
 const Wrapper = styled(SafeAreaView)`
   flex: 1;
@@ -184,6 +193,28 @@ const CHAT_SUBSCRIPTION = gql`
   }
 `
 
+const WEBRTC_SEND_MESSAGE = gql`
+  mutation SendRTCMessage($id: String!, $callID: String!, $message: String!, $type: String!) {
+    sendWebRTCMessage(_id: $id, callID: $callID, message: $message, type: $type) {
+      message
+    }
+  }
+`
+
+const WEBRTC_SUBSCRIPTION = gql`
+  subscription CallsSubscription($id: String!) {
+      webRTCMessage(yourUser: $id) {
+        callID
+        type
+        message
+        chat {
+          _id
+        }
+      }
+    }
+  } 
+`
+
 interface Props extends NavigationInjectedProps {
   data: Data
 }
@@ -191,6 +222,19 @@ interface Props extends NavigationInjectedProps {
 const ChatList = (props: Props) => {
   const { loading, error, me, chats } = props.data
   const [isFetchingEnd, setFetchingEnd] = React.useState(false)
+  const sendRTCMessage = Apollo.useMutation(WEBRTC_SEND_MESSAGE)
+
+  RNCallKit.setup({
+    ios: {
+      appName: 'Chatify',
+    },
+    android: {
+      alertTitle: 'Permissions required',
+      alertDescription: 'This application needs to access your phone accounts',
+      cancelButton: 'Cancel',
+      okButton: 'ok',
+    },
+  })
 
   const renderMessage = (message: string | null | undefined) => {
     if (!message) {
@@ -279,6 +323,40 @@ const ChatList = (props: Props) => {
     )
   }
 
+  const answerCall = (callID: string, chatID: string, fromUser: string) => {}
+
+  const refuseCall = (callID: string, chatID: string, callType: string) => {
+    sendRTCMessage({
+      variables: {
+        id: chatID,
+        callID,
+        message: CALL_TYPES.REJECT,
+        type: callType,
+      } as SendRTCMessageVariables,
+    })
+  }
+
+  props.data.subscribeToMore({
+    document: WEBRTC_SUBSCRIPTION,
+    variables: {
+      id: me._id,
+    },
+    onError: error => console.log('Subscription Error: ', error),
+    updateQuery: async (_, { subscriptionData }) => {
+      const { callID, type, message, fromUser, chat } = subscriptionData.data.webRTCMessage
+      const Busy = await RNCallKit.checkIfBusy()
+      if (Busy) {
+        await refuseCall(callID, chat._id, CALL_TYPES.BUSY)
+      }
+
+      if (type === 'offer') {
+        RNCallKit.displayIncomingCall(callID, fromUser, '', 'generic', true)
+        RNCallKit.addEventListener('endCall', () => refuseCall(callID, chat._id, CALL_TYPES.REJECT))
+        RNCallKit.addEventListener('answerCall', () => answerCall(callID, chat._id, fromUser))
+      }
+    },
+  })
+
   props.data.subscribeToMore({
     document: CHAT_SUBSCRIPTION,
     variables: {
@@ -327,6 +405,7 @@ const ChatList = (props: Props) => {
 
   return (
     <Wrapper>
+      <StatusBar hidden={false} />
       <Header>
         <HeaderTitle>Chats</HeaderTitle>
         <MeProfile source={{ uri: gravatarURL(me.email || '') }} />
