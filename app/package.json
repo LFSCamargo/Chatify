@@ -38,6 +38,7 @@
     "react-apollo": "^2.3.2",
     "react-apollo-hooks": "^0.2.1",
     "react-native": "npm:@brunolemos/react-native",
+    "react-native-callkeep": "^2.0.2",
     "react-native-dotenv": "^0.2.0",
     "react-native-fetch-blob": "^0.10.8",
     "react-native-gesture-handler": "^1.0.12",
@@ -46,6 +47,7 @@
     "react-native-image-resizer": "^1.0.0",
     "react-native-keyboard-spacer": "^0.4.1",
     "react-native-snap-carousel": "^3.7.5",
+    "react-native-webrtc": "^1.69.1",
     "react-navigation": "^3.0.5",
     "styled-components": "^3.4.9"
   },

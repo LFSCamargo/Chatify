@@ -7345,6 +7345,11 @@ react-lifecycles-compat@^3.0.4:
   resolved "https://registry.yarnpkg.com/react-lifecycles-compat/-/react-lifecycles-compat-3.0.4.tgz#4f1a273afdfc8f3488a8c516bfda78f872352362"
   integrity sha512-fBASbA6LnOU9dOU2eW7aQ8xmYBSXUIWr+UmF9b1efZBazGNO+rcXT/icdKnYm2pTwcRylVUYwW7H1PHfLekVzA==
 
+react-native-callkeep@^2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/react-native-callkeep/-/react-native-callkeep-2.0.2.tgz#97c143a6c87723ef36d1bb2416e4f9616434293c"
+  integrity sha512-l7qFt8VohCJwipSHaZ/8qdmud0g5DbWQSklPvk+XEplsZVRdmO2Q4viWSg7oGXfQsOpVeE1f5qaWPt794QHzAg==
+
 react-native-communications@2.2.1:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/react-native-communications/-/react-native-communications-2.2.1.tgz#7883b56b20a002eeb790c113f8616ea8692ca795"
@@ -7454,6 +7459,15 @@ react-native-typescript-transformer@^1.2.10:
     jju "^1.3.0"
     semver "^5.4.1"
     source-map "^0.5.6"
+
+react-native-webrtc@^1.69.1:
+  version "1.69.1"
+  resolved "https://registry.yarnpkg.com/react-native-webrtc/-/react-native-webrtc-1.69.1.tgz#ab461c1bf9f04d0e5fff71498f2946c07ba35502"
+  integrity sha512-tUcu3zRvOCSgS2aj3hlSKVdmRiR6NbQdhPSWJQR2dBct8MgfoW/fKrGLWcAWbt8wmXMJYErQq0V/P3+gOOd+7w==
+  dependencies:
+    base64-js "^1.1.2"
+    event-target-shim "^1.0.5"
+    prop-types "^15.5.10"
 
 "react-native@npm:@brunolemos/react-native":
   version "0.57.7-hooks.1"
