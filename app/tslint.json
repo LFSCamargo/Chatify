@@ -8,6 +8,8 @@
   ],
   "jsRules": {},
   "rules": {
+    "prefer-for-of": false,
+    "no-increment-decrement": false,
     "ordered-imports": false,
     "jsx-no-lambda": false,
     "curly": false,
@@ -17,7 +19,7 @@
     "jsx-boolean-value": false,
     "jsx-no-multiline-js": false,
     "member-access": false,
-    "no-console": [true, "debug", "dir", "log", "trace", "warn"],
+    "no-console": [false, "debug", "dir", "log", "trace", "warn"],
     "no-empty-interface": false,
     "object-literal-sort-keys": false,
     "object-shorthand-properties-first": false,
