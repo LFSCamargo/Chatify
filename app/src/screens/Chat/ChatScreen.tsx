@@ -10,14 +10,29 @@ import {
 } from 'react-native'
 import styled from 'styled-components/native'
 import { NavigationInjectedProps } from 'react-navigation'
-import { GraphqlQueryControls, graphql } from 'react-apollo'
+import { GraphqlQueryControls, graphql, compose } from 'react-apollo'
 import { ChatScreenQuery_me, ChatScreenQuery_chat } from './__generated__/ChatScreenQuery'
 import gql from 'graphql-tag'
 import idx from 'idx'
 import { gravatarURL } from '../../config/utils'
 import Mutation, { MutationResult } from './mutations/SendMessageMutation'
-import { GiftedChat, BubbleProps, InputToolbar } from 'react-native-gifted-chat'
-import { MessageReceived_messageReceived_chat } from './__generated__/MessageReceived'
+import {
+  GiftedChat,
+  BubbleProps,
+  InputToolbar,
+  IMessage,
+  InputToolbarProps,
+} from 'react-native-gifted-chat'
+import {
+  MessageReceived_messageReceived_chat,
+  MessageReceived_messageReceived,
+} from './__generated__/MessageReceived'
+import moment from 'moment'
+import { withInAppNotification, ShowNotificationProps } from 'react-native-in-app-notification'
+import { SendMessageMutationVariables } from './mutations/__generated__/SendMessageMutation'
+import { Dispatch } from 'redux'
+import { setChattingUser } from '../../ducks/chat'
+import { connect } from 'react-redux'
 
 const { width } = Dimensions.get('window')
 
@@ -30,7 +45,7 @@ const CustomToolbar = styled(InputToolbar).attrs({
   },
 })``
 
-const CustomGiftedChat = styled(GiftedChat).attrs({
+const CustomGiftedChat: any = styled(GiftedChat).attrs({
   imageStyle: {},
 })``
 
@@ -184,9 +199,22 @@ const SendButtonIcon = styled.Image.attrs({
   transform: rotate(180deg);
 `
 
+interface Data extends GraphqlQueryControls {
+  me: ChatScreenQuery_me
+  chat: ChatScreenQuery_chat
+}
+
+type Props = NavigationInjectedProps<any> &
+  ShowNotificationProps & {
+    data: Data
+    setChattingUser: (username: string) => void
+  }
+
 const CHAT_SUBSCRIPTION = gql`
   subscription MessageReceived($id: String!) {
     messageReceived(yourUser: $id) {
+      username
+      notificationMessage
       chat {
         _id
         users {
@@ -209,24 +237,59 @@ const CHAT_SUBSCRIPTION = gql`
   }
 `
 
-interface Data extends GraphqlQueryControls {
-  me: ChatScreenQuery_me
-  chat: ChatScreenQuery_chat
-}
-
-interface Params {
-  _id: string
-  userId: string
-}
-
-interface Props extends NavigationInjectedProps<Params> {
-  data: Data
-}
-
-const ChatScreen = (props: Props) => {
-  const { loading, error, me, chat } = props.data
+const ChatScreen: React.FunctionComponent<Props> = props => {
   const [message, setMessage] = React.useState('')
-  const send = Apollo.useMutation(Mutation)
+  const [loadingSend, setLoadingSend] = React.useState(false)
+  const { loading, error, subscribeToMore } = props.data
+  const sendMessageMutation = Apollo.useMutation(Mutation)
+
+  const userID = idx(props.navigation.state.params, _ => _.userId)
+  const chatID = idx(props.navigation.state.params, _ => _._id)
+
+  const goBack = () => {
+    props.setChattingUser('')
+    return props.navigation.goBack()
+  }
+
+  const mutate = async () => {
+    if (!message) {
+      return Alert.alert('Error', 'You need to compose a message to send it!')
+    }
+
+    setLoadingSend(true)
+
+    try {
+      await sendMessageMutation({
+        variables: {
+          id: idx(props.navigation.state.params, _ => _._id),
+          message,
+        } as SendMessageMutationVariables,
+        update: (proxy, result: MutationResult) => {
+          const updatedChat = idx(result.data.sendMessage, _ => _.chat)
+
+          if (!updatedChat) {
+            return
+          }
+
+          proxy.writeQuery({
+            query: Query,
+            data: {
+              me: props.data.me,
+              chat: {
+                ...props.data.chat,
+                messages: updatedChat.messages,
+              },
+            },
+          })
+        },
+      })
+
+      return setLoadingSend(false)
+    } catch (error) {
+      setLoadingSend(false)
+      return Alert.alert('Error', 'An unexpected error occurred while we send your message!')
+    }
+  }
 
   const renderMessage = ({ currentMessage, position }: BubbleProps) => {
     const text = idx(currentMessage, _ => _.text) || ''
@@ -245,6 +308,15 @@ const ChatScreen = (props: Props) => {
     )
   }
 
+  const renderSend = () => {
+    return (
+      <SendButtonWrapper disabled={loadingSend} onPress={() => mutate()}>
+        {loadingSend && <ActivityIndicator color="white" />}
+        {!loadingSend && <SendButtonIcon />}
+      </SendButtonWrapper>
+    )
+  }
+
   const renderComposer = () => {
     return (
       <Input
@@ -256,48 +328,41 @@ const ChatScreen = (props: Props) => {
     )
   }
 
-  const renderSend = () => {
-    return (
-      <SendButtonWrapper onPress={sendMessage}>
-        <SendButtonIcon />
-      </SendButtonWrapper>
-    )
-  }
-
-  const sendMessage = () => {
-    if (!message) {
-      return Alert.alert('Error', 'You need to write the message to send it')
-    }
-
-    send({
+  React.useEffect(() => {
+    subscribeToMore({
+      document: CHAT_SUBSCRIPTION,
       variables: {
-        id: chat._id,
-        message,
+        id: props.navigation.getParam('userId'),
       },
-      update: (proxy, result: MutationResult) => {
-        const updatedChat = idx(result.data.sendMessage, _ => _.chat)
+      updateQuery: (previous, { subscriptionData }) => {
+        const updatedChat: MessageReceived_messageReceived_chat =
+          subscriptionData.data.messageReceived.chat
+        const received: MessageReceived_messageReceived = subscriptionData.data.messageReceived
 
-        if (!updatedChat) {
-          return
+        if (updatedChat._id !== chatID) {
+          props.showNotification({
+            title: received.username || '',
+            message: received.notificationMessage || '',
+            vibrate: true,
+          })
         }
 
-        proxy.writeQuery({
-          query: Query,
-          data: {
-            me,
+        if (!updatedChat) {
+          return previous
+        }
+
+        if (updatedChat._id === chatID) {
+          return {
+            ...previous,
             chat: {
-              ...chat,
+              ...previous.chat,
               messages: updatedChat.messages,
             },
-          },
-        })
+          }
+        }
       },
     })
-      .then(() => {
-        setMessage('')
-      })
-      .catch(() => Alert.alert('Error', 'An Unexpected Error Occurred'))
-  }
+  }, [])
 
   if (loading) {
     return (
@@ -319,50 +384,9 @@ const ChatScreen = (props: Props) => {
     )
   }
 
-  const users = idx(chat, _ => _.users) || []
+  const users = idx(props.data.chat, _ => _.users)
 
-  const user = users.filter(element => element._id !== me._id)[0] || null
-
-  props.data.subscribeToMore({
-    document: CHAT_SUBSCRIPTION,
-    variables: {
-      id: idx(props.navigation, _ => _.state.params.userId) || '',
-    },
-    onError: error => console.log('Subscription Error: ', error),
-    updateQuery: (previous, { subscriptionData }) => {
-      const updatedChat: MessageReceived_messageReceived_chat =
-        subscriptionData.data.messageReceived.chat
-
-      if (!updatedChat) {
-        return previous
-      }
-
-      if (updatedChat._id === chat._id) {
-        return {
-          ...previous,
-          chat: {
-            ...previous.chat,
-            messages: updatedChat.messages,
-          },
-        }
-      }
-
-      return previous
-    },
-  })
-
-  const messages: any = (idx(chat, _ => _.messages) || []).map(element => {
-    return {
-      _id: element._id,
-      text: element.message,
-      createdAt: element.createdAt,
-      user: {
-        _id: element.user._id,
-        name: element.user && element.user.name,
-        avatar: gravatarURL(element.user.email),
-      },
-    }
-  })
+  const otherUser = (idx(users, _ => _) || []).filter(element => element._id !== userID)[0]
 
   return (
     <Wrapper>
@@ -375,23 +399,39 @@ const ChatScreen = (props: Props) => {
           >
             <BackArrow />
           </TouchableOpacity>
-          <HeaderTitle>{(user && user.name.split(' ')[0]) || ''}</HeaderTitle>
+          <HeaderTitle>{(otherUser && otherUser.name.split(' ')[0]) || ''}</HeaderTitle>
         </Row>
-        <UserProfile source={{ uri: gravatarURL((user && user.email) || '') }} />
+        <UserProfile source={{ uri: gravatarURL((otherUser && otherUser.email) || '') }} />
       </Header>
       <CustomGiftedChat
         text={message}
         renderComposer={renderComposer}
         renderSend={renderSend}
-        onSend={sendMessage}
         onInputTextChanged={setMessage}
         minInputToolbarHeight={60}
-        renderInputToolbar={props => <CustomToolbar {...props} />}
+        scrollToBottomOffset={100}
+        renderInputToolbar={(props: InputToolbarProps) => <CustomToolbar {...props} />}
         showAvatarForEveryMessage={false}
         renderBubble={renderMessage}
-        messages={messages.reverse()}
-        // @ts-ignore
-        user={me}
+        messages={(idx(props.data, _ => _.chat.messages) || [])
+          .map(
+            (element): IMessage => {
+              return {
+                _id: element._id,
+                text: element.message,
+                createdAt: moment(element.createdAt).toDate(),
+                user: {
+                  _id: element.user._id,
+                  name: element.user.name,
+                  avatar: gravatarURL(element.user.email),
+                },
+              }
+            },
+          )
+          .reverse()}
+        user={{
+          _id: idx(props.navigation.state.params, _ => _.userId),
+        }}
       />
     </Wrapper>
   )
@@ -425,10 +465,21 @@ const Query = gql`
   }
 `
 
-export default graphql(Query, {
-  options: (props: Props) => ({
-    variables: {
-      id: idx(props.navigation, _ => _.state.params._id) || '',
-    },
+const mapDispatchToProps = (dispatch: Dispatch) => ({
+  setChattingUser: (name: string) => dispatch(setChattingUser(name)),
+})
+
+export default compose(
+  graphql<Props>(Query, {
+    options: (props: Props) => ({
+      variables: {
+        id: props.navigation.getParam('_id'),
+      },
+    }),
   }),
-})(ChatScreen)
+  withInAppNotification,
+  connect(
+    null,
+    mapDispatchToProps,
+  ),
+)(ChatScreen)

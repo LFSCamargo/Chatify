@@ -10,6 +10,7 @@ interface MessageReceived {
   chat: Chat
   notificationMessage: string
   fromUser: string
+  username: string
 }
 
 interface RTCMessage {

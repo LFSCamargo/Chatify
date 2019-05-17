@@ -6,11 +6,13 @@ import {
   TouchableOpacity,
   StatusBar,
 } from 'react-native'
-import { graphql, GraphqlQueryControls } from 'react-apollo'
+import { graphql, GraphqlQueryControls, compose } from 'react-apollo'
+import { withInAppNotification, ShowNotificationProps } from 'react-native-in-app-notification'
+import { connect } from 'react-redux'
+import { getChattingUser, setChattingUser } from '../../ducks/chat'
 import * as Apollo from 'react-apollo-hooks'
 import gql from 'graphql-tag'
 import idx from 'idx'
-import * as R from 'ramda'
 import moment from 'moment'
 import styled from 'styled-components/native'
 import RNCallKit from 'react-native-callkeep'
@@ -23,6 +25,10 @@ import {
 import { gravatarURL, CALL_TYPES } from '../../config/utils'
 import { Routes } from '../../config/Router'
 import { SendRTCMessageVariables } from './__generated__/SendRTCMessage'
+import { UserFocusedContext } from '../../App'
+import { from } from 'zen-observable'
+import { ReduxState } from '../../ducks'
+import { Dispatch } from 'redux'
 
 const Wrapper = styled(SafeAreaView)`
   flex: 1;
@@ -169,25 +175,12 @@ interface Data extends GraphqlQueryControls {
 }
 
 const CHAT_SUBSCRIPTION = gql`
-  subscription ChatListSubscription($id: String!) {
+  subscription MessageReceivedList($id: String!) {
     messageReceived(yourUser: $id) {
+      username
       notificationMessage
       chat {
-        updatedAt
-        lastMessage
         _id
-        users {
-          _id
-          email
-          name
-        }
-        messages {
-          message
-          createdAt
-          user {
-            _id
-          }
-        }
       }
     }
   }
@@ -214,13 +207,17 @@ const WEBRTC_SUBSCRIPTION = gql`
   }
 `
 
-interface Props extends NavigationInjectedProps {
-  data: Data
-}
+type Props = NavigationInjectedProps &
+  ShowNotificationProps & {
+    data: Data
+    chattingUser: string
+    setChattingUser: (username: string) => void
+  }
 
 const ChatList = (props: Props) => {
   const { loading, error, me, chats } = props.data
   const [isFetchingEnd, setFetchingEnd] = React.useState(false)
+
   const sendRTCMessage = Apollo.useMutation(WEBRTC_SEND_MESSAGE)
 
   RNCallKit.setup({
@@ -235,16 +232,12 @@ const ChatList = (props: Props) => {
     },
   })
 
-  const renderMessage = (message: string | null | undefined) => {
-    if (!message) {
-      return 'Chat created ✨'
-    }
-
-    if (message.length > 30) {
-      return `${message.substring(0, 30)}...`
-    }
-
-    return message
+  const goToChat = (_id: string, userId: string, user: string) => {
+    props.navigation.navigate(Routes.ChatScreen, {
+      _id,
+      userId,
+      user,
+    })
   }
 
   const renderItem = (item: ChatListQuery_chats_edges) => {
@@ -254,12 +247,7 @@ const ChatList = (props: Props) => {
     const formattedNameArr = (user && (user.name || '').split(' ')) || []
     return (
       <TouchableOpacity
-        onPress={() =>
-          props.navigation.navigate(Routes.ChatScreen, {
-            _id,
-            userId: me._id,
-          })
-        }
+        onPress={() => goToChat(_id || '', me._id || '', (user && user.name) || '')}
       >
         <Row>
           <AvatarAndText>
@@ -270,10 +258,9 @@ const ChatList = (props: Props) => {
                   ? `${formattedNameArr[0]} ${formattedNameArr[1]}`
                   : user && user.name}
               </ContactName>
-              <SmallText>{renderMessage(lastMessage || '')}</SmallText>
+              <SmallText>{moment(updatedAt || '').fromNow()}</SmallText>
             </TextContainer>
           </AvatarAndText>
-          <SmallText>{moment(updatedAt || '').fromNow()}</SmallText>
         </Row>
       </TouchableOpacity>
     )
@@ -335,81 +322,29 @@ const ChatList = (props: Props) => {
     })
   }
 
-  props.data.subscribeToMore({
-    document: WEBRTC_SUBSCRIPTION,
-    variables: {
-      id: me._id,
-    },
-    onError: error => console.log('Subscription Error: ', error),
-    updateQuery: async (_, { subscriptionData }) => {
-      const { callID, type, message, fromUser, chat } = subscriptionData.data.webRTCMessage
-      const Busy = await RNCallKit.checkIfBusy()
-      if (Busy) {
-        await refuseCall(callID, chat._id, CALL_TYPES.BUSY)
-      }
-
-      if (type === 'offer') {
-        RNCallKit.displayIncomingCall(callID, fromUser, '', 'generic', true)
-        RNCallKit.addEventListener('endCall', () => refuseCall(callID, chat._id, CALL_TYPES.REJECT))
-        RNCallKit.addEventListener('answerCall', () => answerCall(callID, chat._id, fromUser))
-      }
-    },
-  })
-
-  props.data.subscribeToMore({
-    document: CHAT_SUBSCRIPTION,
-    variables: {
-      id: me._id,
-    },
-    onError: error => console.log('Subscription Error: ', error),
-    updateQuery: (previous, { subscriptionData }) => {
-      const updatedChat = subscriptionData.data.messageReceived.chat
-
-      const edges = (idx(previous.chats, _ => _.edges) || []).map((element: any) => ({
-        _id: element._id,
-      }))
-
-      const obj = {
-        _id: updatedChat._id,
-      }
-
-      const existsOnEdges = R.includes(obj, edges)
-
-      if (existsOnEdges) {
-        const filtered = previous.chats.edges.filter(
-          (element: any) => element._id !== updatedChat._id,
-        )
-
-        console.log('PREVIOUS', previous)
-        console.log('UPDATED', {
-          ...previous,
-          chats: {
-            ...previous.chats,
-            edges: [updatedChat, ...filtered],
-          },
-        })
-        return {
-          ...previous,
-          chats: {
-            ...previous.chats,
-            edges: [updatedChat, ...filtered],
-          },
+  React.useEffect(() => {
+    props.data.subscribeToMore({
+      document: WEBRTC_SUBSCRIPTION,
+      variables: {
+        id: me._id,
+      },
+      updateQuery: async (_, { subscriptionData }) => {
+        const { callID, type, message, fromUser, chat } = subscriptionData.data.webRTCMessage
+        const Busy = await RNCallKit.checkIfBusy()
+        if (Busy) {
+          await refuseCall(callID, chat._id, CALL_TYPES.BUSY)
         }
-      }
 
-      if (!existsOnEdges) {
-        return {
-          ...previous,
-          chats: {
-            ...previous.chats,
-            edges: [updatedChat, ...previous.chats.edges],
-          },
+        if (type === 'offer') {
+          RNCallKit.displayIncomingCall(callID, fromUser, '', 'generic', true)
+          RNCallKit.addEventListener('endCall', () =>
+            refuseCall(callID, chat._id, CALL_TYPES.REJECT),
+          )
+          RNCallKit.addEventListener('answerCall', () => answerCall(callID, chat._id, fromUser))
         }
-      }
-
-      return previous
-    },
-  })
+      },
+    })
+  }, [])
 
   return (
     <Wrapper>
@@ -474,4 +409,19 @@ export const ListQuery = gql`
   }
 `
 
-export default graphql<Props>(ListQuery)(ChatList)
+const mapStateToProps = (state: ReduxState) => ({
+  chattingUser: getChattingUser(state),
+})
+
+const mapDispatchToProps = (dispatch: Dispatch) => ({
+  setChattingUser: (name: string) => dispatch(setChattingUser(name)),
+})
+
+export default compose(
+  graphql<Props>(ListQuery),
+  withInAppNotification,
+  connect(
+    mapStateToProps,
+    mapDispatchToProps,
+  ),
+)(ChatList)

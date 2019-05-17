@@ -11,6 +11,12 @@ export const checkEmoji = (text: string) => {
   return emojiRegex.test(text)
 }
 
+export const topNavRoute = (topNextNav: any) => {
+  const { index, routes } = topNextNav.routes[0]
+
+  return routes[index].params
+}
+
 export const CALL_TYPES = {
   REJECT: 'REJECT',
   BUSY: 'BUSY',

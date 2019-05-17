@@ -133,8 +133,9 @@ export default {
 
       pubsub.publish(SUBSCRIPTION_TRIGGERS.MESSAGE_RECEIVED, {
         fromUser: user._id,
+        username: user.name,
         chat: await chatModel.findOne({ _id }),
-        notificationMessage: `${user.name}: ${message}`,
+        notificationMessage: message,
       })
 
       return {

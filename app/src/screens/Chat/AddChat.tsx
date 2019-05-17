@@ -287,7 +287,7 @@ const AddChat = (props: Props) => {
       <FlatList
         onEndReached={onEndReached}
         keyExtractor={item => idx(item, _ => _._id) || ''}
-        data={users.edges || []}
+        data={(idx(users, _ => _.edges) || []).filter(element => element._id !== props.data.me._id)}
         ListFooterComponent={Platform.OS === 'ios' ? <KeyboardSpacer /> : null}
         ListHeaderComponent={
           <HeaderRow>

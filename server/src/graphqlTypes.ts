@@ -12,6 +12,7 @@ const graphqlTypes = gql`
   type MessageReceivedSubscription {
     chat: Chat
     notificationMessage: String
+    username: String
   }
 
   type WebRTCMessage {

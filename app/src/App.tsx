@@ -4,9 +4,18 @@ import { ThemeProvider } from 'styled-components'
 import { createRouter } from './config/Router'
 import { ApolloProvider } from 'react-apollo'
 import { ApolloProvider as ApolloHooksProvider } from 'react-apollo-hooks'
+import { InAppNotificationProvider } from 'react-native-in-app-notification'
+import { Provider as ReduxProvider } from 'react-redux'
 
 import Theme from './config/Theme'
 import client from './config/client'
+import Store from './config/store'
+
+export const UserFocusedContext = React.createContext<any>(null)
+
+if (__DEV__) {
+  console.disableYellowBox = true
+}
 
 export interface Props {}
 
@@ -21,22 +30,25 @@ const App = () => {
 
   React.useEffect(() => {
     getToken()
-    // AsyncStorage.clear();
   }, [])
 
   const Router = createRouter(token)
 
   return (
-    <ApolloProvider client={client}>
-      <ApolloHooksProvider client={client}>
-        <ThemeProvider theme={Theme}>
-          <View style={{ flex: 1 }}>
-            <StatusBar barStyle="light-content" backgroundColor={Theme.colors.primary} />
-            <Router />
-          </View>
-        </ThemeProvider>
-      </ApolloHooksProvider>
-    </ApolloProvider>
+    <ReduxProvider store={Store}>
+      <ApolloProvider client={client}>
+        <ApolloHooksProvider client={client}>
+          <ThemeProvider theme={Theme}>
+            <InAppNotificationProvider openCloseDuration={1000} height={100} closeInterval={2000}>
+              <View style={{ flex: 1 }}>
+                <StatusBar barStyle="light-content" backgroundColor={Theme.colors.primary} />
+                <Router />
+              </View>
+            </InAppNotificationProvider>
+          </ThemeProvider>
+        </ApolloHooksProvider>
+      </ApolloProvider>
+    </ReduxProvider>
   )
 }
 

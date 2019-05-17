@@ -1,4 +1,9 @@
-import { createAppContainer, createStackNavigator, createSwitchNavigator } from 'react-navigation'
+import {
+  createAppContainer,
+  createStackNavigator,
+  createSwitchNavigator,
+  NavigationContainer,
+} from 'react-navigation'
 import ChatList from '../screens/Chat/ChatsList'
 import ChatScreen from '../screens/Chat/ChatScreen'
 import AddChat from '../screens/Chat/AddChat'
@@ -38,7 +43,7 @@ const NonLogged = createStackNavigator(
   },
 )
 
-export const createRouter = (token: string) =>
+export const createRouter = (token: string): NavigationContainer =>
   createAppContainer(
     createSwitchNavigator(
       {
