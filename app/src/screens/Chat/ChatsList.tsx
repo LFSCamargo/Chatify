@@ -203,16 +203,15 @@ const WEBRTC_SEND_MESSAGE = gql`
 
 const WEBRTC_SUBSCRIPTION = gql`
   subscription CallsSubscription($id: String!) {
-      webRTCMessage(yourUser: $id) {
-        callID
-        type
-        message
-        chat {
-          _id
-        }
+    webRTCMessage(yourUser: $id) {
+      callID
+      type
+      message
+      chat {
+        _id
       }
     }
-  } 
+  }
 `
 
 interface Props extends NavigationInjectedProps {
@@ -380,6 +379,15 @@ const ChatList = (props: Props) => {
         const filtered = previous.chats.edges.filter(
           (element: any) => element._id !== updatedChat._id,
         )
+
+        console.log('PREVIOUS', previous)
+        console.log('UPDATED', {
+          ...previous,
+          chats: {
+            ...previous.chats,
+            edges: [updatedChat, ...filtered],
+          },
+        })
         return {
           ...previous,
           chats: {
@@ -465,5 +473,5 @@ export const ListQuery = gql`
     }
   }
 `
-// @ts-ignore
-export default graphql(ListQuery)(ChatList)
+
+export default graphql<Props>(ListQuery)(ChatList)
