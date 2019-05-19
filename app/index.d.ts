@@ -19,17 +19,17 @@ declare module 'react-native-in-app-notification' {
     vibrate?: boolean
   }
 
-  export function ShowNotificationFn(params: ShowNotificationParams): void
+  function ShowNotificationFn(params: ShowNotificationParams): void
 
-  export interface ShowNotificationProps {
+  interface ShowNotificationProps {
     showNotification: (params: ShowNotificationParams) => void
   }
 
-  export const Notification: ComponentClass<NotificationProps>
+  const Notification: ComponentClass<NotificationProps>
 
-  export const InAppNotificationProvider: ComponentClass<NotificationProps>
+  const InAppNotificationProvider: ComponentClass<NotificationProps>
 
-  export function withInAppNotification<T>(
+  function withInAppNotification<T>(
     WrappedComponent: React.ComponentType<T & ShowNotificationProps>,
   ): React.ComponentClass<T>
 }
