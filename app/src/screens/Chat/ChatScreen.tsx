@@ -329,6 +329,7 @@ const ChatScreen: React.FunctionComponent<Props> = props => {
   }
 
   React.useEffect(() => {
+    props.setChattingUser(props.navigation.state.params.user)
     subscribeToMore({
       document: CHAT_SUBSCRIPTION,
       variables: {
@@ -395,7 +396,7 @@ const ChatScreen: React.FunctionComponent<Props> = props => {
         <Row>
           <TouchableOpacity
             hitSlop={{ top: 20, left: 20, right: 20, bottom: 20 }}
-            onPress={() => props.navigation.goBack()}
+            onPress={() => goBack()}
           >
             <BackArrow />
           </TouchableOpacity>

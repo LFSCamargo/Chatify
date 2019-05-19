@@ -11,6 +11,7 @@ import { withInAppNotification, ShowNotificationProps } from 'react-native-in-ap
 import { connect } from 'react-redux'
 import { getChattingUser, setChattingUser } from '../../ducks/chat'
 import * as Apollo from 'react-apollo-hooks'
+import * as R from 'ramda'
 import gql from 'graphql-tag'
 import idx from 'idx'
 import moment from 'moment'
@@ -25,8 +26,6 @@ import {
 import { gravatarURL, CALL_TYPES } from '../../config/utils'
 import { Routes } from '../../config/Router'
 import { SendRTCMessageVariables } from './__generated__/SendRTCMessage'
-import { UserFocusedContext } from '../../App'
-import { from } from 'zen-observable'
 import { ReduxState } from '../../ducks'
 import { Dispatch } from 'redux'
 
@@ -186,6 +185,30 @@ const CHAT_SUBSCRIPTION = gql`
   }
 `
 
+const CHAT_LIST_SUB = gql`
+  subscription ChatsSubscriptions($id: String!) {
+    messageReceived(yourUser: $id) {
+      chat {
+        updatedAt
+        _id
+        lastMessage
+        users {
+          _id
+          email
+          name
+        }
+        messages {
+          message
+          createdAt
+          user {
+            _id
+          }
+        }
+      }
+    }
+  }
+`
+
 const WEBRTC_SEND_MESSAGE = gql`
   mutation SendRTCMessage($id: String!, $callID: String!, $message: String!, $type: String!) {
     sendWebRTCMessage(_id: $id, callID: $callID, message: $message, type: $type) {
@@ -233,11 +256,24 @@ const ChatList = (props: Props) => {
   })
 
   const goToChat = (_id: string, userId: string, user: string) => {
+    props.setChattingUser(user)
     props.navigation.navigate(Routes.ChatScreen, {
       _id,
       userId,
       user,
     })
+  }
+
+  const renderMessage = (message: string | null | undefined) => {
+    if (!message) {
+      return 'Chat created ✨'
+    }
+
+    if (message.length > 30) {
+      return `${message.substring(0, 30)}...`
+    }
+
+    return message
   }
 
   const renderItem = (item: ChatListQuery_chats_edges) => {
@@ -253,14 +289,11 @@ const ChatList = (props: Props) => {
           <AvatarAndText>
             <UsersProfile source={{ uri: gravatarURL((user && user.email) || '') }} />
             <TextContainer>
-              <ContactName>
-                {formattedNameArr.length !== 1
-                  ? `${formattedNameArr[0]} ${formattedNameArr[1]}`
-                  : user && user.name}
-              </ContactName>
-              <SmallText>{moment(updatedAt || '').fromNow()}</SmallText>
+              <ContactName>{`${formattedNameArr[0]}`}</ContactName>
+              <SmallText>{renderMessage(lastMessage || '')}</SmallText>
             </TextContainer>
           </AvatarAndText>
+          <SmallText>{moment(updatedAt || '').fromNow()}</SmallText>
         </Row>
       </TouchableOpacity>
     )
@@ -321,6 +354,17 @@ const ChatList = (props: Props) => {
       } as SendRTCMessageVariables,
     })
   }
+
+  React.useEffect(
+    () => {
+      if (props.chattingUser === '') {
+        props.data.startPolling(500)
+      } else {
+        props.data.stopPolling()
+      }
+    },
+    [props.chattingUser],
+  )
 
   React.useEffect(() => {
     props.data.subscribeToMore({
