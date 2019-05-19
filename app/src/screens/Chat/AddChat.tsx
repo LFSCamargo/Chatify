@@ -9,6 +9,7 @@ import {
   Platform,
   StatusBar,
 } from 'react-native'
+import debounce from 'debounce'
 import styled from 'styled-components/native'
 import KeyboardSpacer from 'react-native-keyboard-spacer'
 import { NavigationInjectedProps } from 'react-navigation'
@@ -17,6 +18,7 @@ import {
   AddChatQuery_me,
   AddChatQuery_users,
   AddChatQuery_users_edges,
+  AddChatQueryVariables,
 } from './__generated__/AddChatQuery'
 import gql from 'graphql-tag'
 import idx from 'idx'
@@ -188,9 +190,18 @@ const AddChat = (props: Props) => {
   const [isFetchingEnd, setFetchingEnd] = React.useState(false)
   const addChat = Apollo.useMutation(AddChatMutation)
 
-  const searchUser = () => {
-    props.data.refetch({
-      search,
+  const searchUser = async () => {
+    await props.data.fetchMore({
+      variables: {
+        search,
+        more: props.data.variables.more,
+      },
+      updateQuery: (previousResult, { fetchMoreResult }) => {
+        return {
+          ...previousResult,
+          users: fetchMoreResult.users,
+        }
+      },
     })
   }
 
@@ -217,7 +228,7 @@ const AddChat = (props: Props) => {
 
     return props.data
       .fetchMore({
-        variables: { first: more },
+        variables: { first: more, search },
         updateQuery: (previousResult, { fetchMoreResult }) => {
           return {
             ...previousResult,
@@ -226,6 +237,11 @@ const AddChat = (props: Props) => {
         },
       })
       .then(() => setFetchingEnd(false))
+  }
+
+  const onChangeSearch = (text: string) => {
+    setSearch(text)
+    debounce(searchUser, 100)
   }
 
   const renderItem = (item: AddChatQuery_users_edges | null) => {
@@ -291,7 +307,7 @@ const AddChat = (props: Props) => {
         ListFooterComponent={Platform.OS === 'ios' ? <KeyboardSpacer /> : null}
         ListHeaderComponent={
           <HeaderRow>
-            <Input onChangeText={setSearch} onBlur={searchUser} value={search} />
+            <Input onChangeText={text => onChangeSearch(text)} onBlur={searchUser} value={search} />
             <TouchableOpacity onPress={searchUser}>
               <SearchIcon />
             </TouchableOpacity>
@@ -320,5 +336,5 @@ const Query = gql`
     }
   }
 `
-// @ts-ignore
-export default graphql(Query)(AddChat)
+
+export default graphql<Props, AddChatQueryVariables>(Query)(AddChat)
