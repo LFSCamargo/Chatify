@@ -27,7 +27,6 @@
     "apollo-client-preset": "^1.0.8",
     "apollo-codegen": "^0.20.2",
     "apollo-link-context": "^1.0.10",
-    "emoji-aware": "^3.0.4",
     "graphql": "^14.0.2",
     "graphql-tag": "^2.10.0",
     "gravatar": "^1.8.0",

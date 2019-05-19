@@ -11,7 +11,6 @@ import { withInAppNotification, ShowNotificationProps } from 'react-native-in-ap
 import { connect } from 'react-redux'
 import { getChattingUser, setChattingUser } from '../../ducks/chat'
 import * as Apollo from 'react-apollo-hooks'
-import * as R from 'ramda'
 import gql from 'graphql-tag'
 import idx from 'idx'
 import moment from 'moment'
@@ -269,8 +268,8 @@ const ChatList = (props: Props) => {
       return 'Chat created ✨'
     }
 
-    if (message.length > 30) {
-      return `${message.substring(0, 30)}...`
+    if (message.length > 10) {
+      return `${message.substring(0, 10)}...`
     }
 
     return message
@@ -290,10 +289,11 @@ const ChatList = (props: Props) => {
             <UsersProfile source={{ uri: gravatarURL((user && user.email) || '') }} />
             <TextContainer>
               <ContactName>{`${formattedNameArr[0]}`}</ContactName>
-              <SmallText>{renderMessage(lastMessage || '')}</SmallText>
+              <SmallText>
+                {renderMessage(lastMessage || '')} - {moment(updatedAt || '').fromNow()}
+              </SmallText>
             </TextContainer>
           </AvatarAndText>
-          <SmallText>{moment(updatedAt || '').fromNow()}</SmallText>
         </Row>
       </TouchableOpacity>
     )

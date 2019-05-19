@@ -14,7 +14,7 @@ import { GraphqlQueryControls, graphql, compose } from 'react-apollo'
 import { ChatScreenQuery_me, ChatScreenQuery_chat } from './__generated__/ChatScreenQuery'
 import gql from 'graphql-tag'
 import idx from 'idx'
-import { gravatarURL } from '../../config/utils'
+import { gravatarURL, checkEmoji, hasOnlyEmoji, emojiStringToArray } from '../../config/utils'
 import Mutation, { MutationResult } from './mutations/SendMessageMutation'
 import {
   GiftedChat,
@@ -69,7 +69,7 @@ const Input = styled.TextInput.attrs({
 const OtherUserMessageWrapper = styled.View`
   padding: 10px 15px;
   margin-top: 10;
-  max-width: ${width - 20};
+  max-width: ${width - 70};
   align-items: center;
   justify-content: center;
   border-radius: 20px;
@@ -85,7 +85,7 @@ const OtherUserMessageText = styled.Text`
 const UserMessageWrapper = styled.View`
   padding: 10px 15px;
   align-items: center;
-  max-width: ${width - 20};
+  max-width: ${width - 70};
   justify-content: center;
   margin-top: 10;
   border-radius: 20px;
@@ -199,6 +199,12 @@ const SendButtonIcon = styled.Image.attrs({
   transform: rotate(180deg);
 `
 
+const EmojiText = styled.Text`
+  font-size: 35;
+  min-height: 50;
+  line-height: 50;
+`
+
 interface Data extends GraphqlQueryControls {
   me: ChatScreenQuery_me
   chat: ChatScreenQuery_chat
@@ -251,6 +257,27 @@ const ChatScreen: React.FunctionComponent<Props> = props => {
     return props.navigation.goBack()
   }
 
+  const bigEmojiDecider = (text: string) => {
+    const hasEmoji = checkEmoji(text)
+
+    if (!hasEmoji) return false
+
+    const onlyEmoji = hasOnlyEmoji(text)
+
+    if (!onlyEmoji) return false
+
+    const emojisArr = emojiStringToArray(text)
+
+    const emojiCount = emojisArr && emojisArr.length
+
+    console.log(emojisArr)
+    console.log(emojiCount)
+
+    const result = emojiCount <= 3
+
+    return result
+  }
+
   const mutate = async () => {
     if (!message) {
       return Alert.alert('Error', 'You need to compose a message to send it!')
@@ -284,6 +311,7 @@ const ChatScreen: React.FunctionComponent<Props> = props => {
         },
       })
 
+      setMessage('')
       return setLoadingSend(false)
     } catch (error) {
       setLoadingSend(false)
@@ -294,14 +322,20 @@ const ChatScreen: React.FunctionComponent<Props> = props => {
   const renderMessage = ({ currentMessage, position }: BubbleProps) => {
     const text = idx(currentMessage, _ => _.text) || ''
 
+    const renderBigMoji = bigEmojiDecider(text)
+
     if (position === 'left') {
-      return (
+      return renderBigMoji ? (
+        <EmojiText>{text}</EmojiText>
+      ) : (
         <OtherUserMessageWrapper>
           <OtherUserMessageText>{text}</OtherUserMessageText>
         </OtherUserMessageWrapper>
       )
     }
-    return (
+    return renderBigMoji ? (
+      <EmojiText>{text}</EmojiText>
+    ) : (
       <UserMessageWrapper>
         <UserMessageText>{text}</UserMessageText>
       </UserMessageWrapper>
@@ -329,7 +363,6 @@ const ChatScreen: React.FunctionComponent<Props> = props => {
   }
 
   React.useEffect(() => {
-    props.setChattingUser(props.navigation.state.params.user)
     subscribeToMore({
       document: CHAT_SUBSCRIPTION,
       variables: {
