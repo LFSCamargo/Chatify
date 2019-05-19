@@ -4,10 +4,18 @@
     "tslint:recommended", 
     "tslint-react",
     "tslint-config-airbnb",
-    "tslint-config-prettier"
+    "tslint-config-prettier",
+    "tslint-plugin-graphql"
   ],
   "jsRules": {},
   "rules": {
+    "graphql": [
+      true,
+      {
+        "env": "apollo",
+        "schemaJsonFilepath": "./data/schema.json"
+      }
+    ],
     "prefer-for-of": false,
     "no-increment-decrement": false,
     "ordered-imports": false,
