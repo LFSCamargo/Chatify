@@ -443,7 +443,7 @@ const ChatScreen: React.FunctionComponent<Props> = props => {
         renderSend={renderSend}
         onInputTextChanged={setMessage}
         minInputToolbarHeight={60}
-        scrollToBottomOffset={100}
+        scrollToBottomOffset={10}
         renderInputToolbar={(props: InputToolbarProps) => <CustomToolbar {...props} />}
         showAvatarForEveryMessage={false}
         renderBubble={renderMessage}

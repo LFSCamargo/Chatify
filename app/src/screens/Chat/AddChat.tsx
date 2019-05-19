@@ -320,7 +320,7 @@ const AddChat = (props: Props) => {
 }
 
 const Query = gql`
-  query AddChatQuery($first: Int = 10, $search: String = "") {
+  query AddChatQuery($first: Int, $search: String = "") {
     me {
       _id
       email
@@ -337,4 +337,10 @@ const Query = gql`
   }
 `
 
-export default graphql<Props, AddChatQueryVariables>(Query)(AddChat)
+export default graphql<Props, AddChatQueryVariables>(Query, {
+  options: {
+    variables: {
+      first: 10,
+    },
+  },
+})(AddChat)
