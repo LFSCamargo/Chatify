@@ -22,7 +22,7 @@ import {
   ChatListQuery_chats,
   ChatListQuery_chats_edges,
 } from './__generated__/ChatListQuery'
-import { gravatarURL, CALL_TYPES } from '../../config/utils'
+import { gravatarURL, CALL_TYPES, createUUID } from '../../config/utils'
 import { Routes } from '../../config/Router'
 import { SendRTCMessageVariables } from './__generated__/SendRTCMessage'
 import { ReduxState } from '../../ducks'
@@ -167,46 +167,29 @@ const TextContainer = styled.View`
   margin-left: 10;
 `
 
+const CallButton = styled.TouchableOpacity.attrs({
+  hitSlop: { top: 20, left: 20, right: 20, bottom: 20 }
+})`
+  width: 35;
+  height: 35;
+  border-radius: ${35/2};
+  background-color: ${({ theme }) => theme.colors.accent};
+  align-items: center;
+  justify-content: center;
+`
+
+const CallIcon = styled.Image.attrs({
+  source: ({ theme }) => theme.images.phone
+})`
+  width: 23;
+  height: 8;
+  transform: rotate(130deg);
+`
+
 interface Data extends GraphqlQueryControls {
   me: ChatListQuery_me
   chats: ChatListQuery_chats
 }
-
-const CHAT_SUBSCRIPTION = gql`
-  subscription MessageReceivedList($id: String!) {
-    messageReceived(yourUser: $id) {
-      username
-      notificationMessage
-      chat {
-        _id
-      }
-    }
-  }
-`
-
-const CHAT_LIST_SUB = gql`
-  subscription ChatsSubscriptions($id: String!) {
-    messageReceived(yourUser: $id) {
-      chat {
-        updatedAt
-        _id
-        lastMessage
-        users {
-          _id
-          email
-          name
-        }
-        messages {
-          message
-          createdAt
-          user {
-            _id
-          }
-        }
-      }
-    }
-  }
-`
 
 const WEBRTC_SEND_MESSAGE = gql`
   mutation SendRTCMessage($id: String!, $callID: String!, $message: String!, $type: String!) {
@@ -294,9 +277,23 @@ const ChatList = (props: Props) => {
               </SmallText>
             </TextContainer>
           </AvatarAndText>
+          <CallButton onPress={() => goToCall(user && user.name || '', _id || '')}>
+            <CallIcon />
+          </CallButton>
         </Row>
       </TouchableOpacity>
     )
+  }
+
+  const goToCall = (callUser: string, chatId: string) => {
+    const callID = createUUID();
+
+    props.navigation.navigate(Routes.CallScreen, {
+      calling: true,
+      callID,
+      callUser,
+      chatId,
+    })
   }
 
   const onEndReached = () => {
@@ -342,7 +339,15 @@ const ChatList = (props: Props) => {
     )
   }
 
-  const answerCall = (callID: string, chatID: string, fromUser: string) => {}
+  const answerCall = (callID: string, chatId: string, fromUser: string, sdp: any) => {
+    props.navigation.navigate(Routes.CallScreen, {
+      calling: true,
+      callID,
+      callUser: fromUser,
+      sdp,
+      chatId,
+    })
+  }
 
   const refuseCall = (callID: string, chatID: string, callType: string) => {
     sendRTCMessage({
@@ -373,7 +378,7 @@ const ChatList = (props: Props) => {
         id: me._id,
       },
       updateQuery: async (_, { subscriptionData }) => {
-        const { callID, type, message, fromUser, chat } = subscriptionData.data.webRTCMessage
+        const { callID, type, fromUser, chat, message } = subscriptionData.data.webRTCMessage
         const Busy = await RNCallKit.checkIfBusy()
         if (Busy) {
           await refuseCall(callID, chat._id, CALL_TYPES.BUSY)
@@ -384,7 +389,7 @@ const ChatList = (props: Props) => {
           RNCallKit.addEventListener('endCall', () =>
             refuseCall(callID, chat._id, CALL_TYPES.REJECT),
           )
-          RNCallKit.addEventListener('answerCall', () => answerCall(callID, chat._id, fromUser))
+          RNCallKit.addEventListener('answerCall', () => answerCall(callID, chat._id, fromUser, message))
         }
       },
     })

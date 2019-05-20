@@ -9,12 +9,14 @@ import ChatScreen from '../screens/Chat/ChatScreen'
 import AddChat from '../screens/Chat/AddChat'
 import Login from '../screens/Login/Login'
 import SignUp from '../screens/SignUp/SignUp'
+import CallScreen from '../screens/Chat/CallScreen';
 
 export const Routes = {
   Login: 'Login',
   SignUp: 'SignUp',
   ChatList: 'ChatList',
   ChatScreen: 'ChatScreen',
+  CallScreen: 'CallScreen',
   AddChat: 'AddChat',
   Logged: 'Logged',
   NonLogged: 'NonLogged',
@@ -24,6 +26,7 @@ const Logged = createStackNavigator(
   {
     [Routes.ChatList]: ChatList,
     [Routes.ChatScreen]: ChatScreen,
+    [Routes.CallScreen]: CallScreen,
     [Routes.AddChat]: AddChat,
   },
   {

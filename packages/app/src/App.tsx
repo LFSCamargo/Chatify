@@ -39,7 +39,7 @@ const App = () => {
       <ApolloProvider client={client}>
         <ApolloHooksProvider client={client}>
           <ThemeProvider theme={Theme}>
-            <InAppNotificationProvider openCloseDuration={1000} height={100} closeInterval={2000}>
+            <InAppNotificationProvider>
               <View style={{ flex: 1 }}>
                 <StatusBar barStyle="light-content" backgroundColor={Theme.colors.primary} />
                 <Router />

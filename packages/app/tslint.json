@@ -9,6 +9,7 @@
   ],
   "jsRules": {},
   "rules": {
+    "no-bitwise": false,
     "graphql": [
       true,
       {

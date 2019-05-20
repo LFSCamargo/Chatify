@@ -1,5 +1,5 @@
 {
-  "name": "app",
+  "name": "@chatify/app",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -11,6 +11,7 @@
     "precommit": "lint-staged",
     "prettier:all": "prettier 'src/**/*.ts*' --write",
     "xcode": "open ios/$npm_package_name.xcodeproj",
+    "ios": "react-native run-ios",
     "update-schema": "cd data && apollo-codegen introspect-schema http://localhost:5000 --output schema.json",
     "postinstall": "yarn codegen",
     "codegen": "apollo codegen:generate --localSchemaFile=data/schema.json --target=typescript && rm -rf __generated__",

@@ -1,0 +1,13 @@
+{
+  "private": true,
+  "name": "Chatify",
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "server:dev": "yarn workspace @chatify/server dev",
+    "server:build": "yarn workspace @chatify/server build",
+    "server:production": "yarn workspace @chatify/server start",
+    "app:start": "yarn workspace @chatify/app start",
+    "app:xcode": "yarn workspace @chatify/app xcode",
+    "app:studio": "yarn workspace @chatify/app studio"
+  }
+}
