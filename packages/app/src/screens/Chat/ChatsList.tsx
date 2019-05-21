@@ -168,18 +168,18 @@ const TextContainer = styled.View`
 `
 
 const CallButton = styled.TouchableOpacity.attrs({
-  hitSlop: { top: 20, left: 20, right: 20, bottom: 20 }
+  hitSlop: { top: 20, left: 20, right: 20, bottom: 20 },
 })`
   width: 35;
   height: 35;
-  border-radius: ${35/2};
+  border-radius: ${35 / 2};
   background-color: ${({ theme }) => theme.colors.accent};
   align-items: center;
   justify-content: center;
 `
 
 const CallIcon = styled.Image.attrs({
-  source: ({ theme }) => theme.images.phone
+  source: ({ theme }) => theme.images.phone,
 })`
   width: 23;
   height: 8;
@@ -237,20 +237,17 @@ const ChatList = (props: Props) => {
     },
   })
 
-  console.log(props);
+  console.log(props)
 
-  React.useEffect(
-    () => {
-      if (!loading && !error) {
-        if (props.chattingUser === '') {
-          props.data.startPolling(500)
-        } else {
-          props.data.stopPolling()
-        }
+  React.useEffect(() => {
+    if (!loading && !error) {
+      if (props.chattingUser === '') {
+        props.data.startPolling(500)
+      } else {
+        props.data.stopPolling()
       }
-    },
-    [props.chattingUser, props.data.loading],
-  )
+    }
+  }, [props.chattingUser, props.data.loading])
 
   React.useEffect(() => {
     if (!loading && !error) {
@@ -265,13 +262,15 @@ const ChatList = (props: Props) => {
           if (Busy) {
             await refuseCall(callID, chat._id, CALL_TYPES.BUSY)
           }
-  
+
           if (type === 'offer') {
             RNCallKit.displayIncomingCall(callID, fromUser, '', 'generic', true)
             RNCallKit.addEventListener('endCall', () =>
               refuseCall(callID, chat._id, CALL_TYPES.REJECT),
             )
-            RNCallKit.addEventListener('answerCall', () => answerCall(callID, chat._id, fromUser, message))
+            RNCallKit.addEventListener('answerCall', () =>
+              answerCall(callID, chat._id, fromUser, message),
+            )
           }
         },
       })
@@ -318,16 +317,16 @@ const ChatList = (props: Props) => {
               </SmallText>
             </TextContainer>
           </AvatarAndText>
-          <CallButton onPress={() => goToCall(user && user.name || '', _id || '')}>
+          {/* <CallButton onPress={() => goToCall(user && user.name || '', _id || '')}>
             <CallIcon />
-          </CallButton>
+          </CallButton> */}
         </Row>
       </TouchableOpacity>
     )
   }
 
   const goToCall = (callUser: string, chatId: string) => {
-    const callID = createUUID();
+    const callID = createUUID()
 
     props.navigation.navigate(Routes.CallScreen, {
       calling: true,
@@ -363,7 +362,7 @@ const ChatList = (props: Props) => {
   if (loading) {
     return (
       <AlignAtCenter>
-        <ActivityIndicator animating color="white" />
+        <ActivityIndicator animating color='white' />
       </AlignAtCenter>
     )
   }
