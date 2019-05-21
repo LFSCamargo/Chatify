@@ -7,13 +7,13 @@
   "nohoist": [],
   "devDependencies": {
     "@types/graphql": "^14.0.4",
+    "husky": "^2.3.0",
+    "lint-staged": "^8.1.7",
+    "prettier": "^1.17.1",
     "tslint": "^5.11.0",
     "tslint-config-airbnb": "^5.11.1",
     "tslint-config-prettier": "^1.17.0",
-    "tslint-react": "^3.6.0",
-    "husky": "^2.3.0",
-    "lint-staged": "^8.1.7",
-    "prettier": "^1.17.1"
+    "tslint-react": "^3.6.0"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
@@ -24,16 +24,21 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "yarn precommit"
+      "pre-commit": "yarn precommit",
+      "pre-push": "yarn lint"
     }
   },
   "scripts": {
     "precommit": "lint-staged",
+    "postinstall": "rimraf .git/hooks/pre-push",
     "server:dev": "yarn workspace @chatify/server dev",
     "server:build": "yarn workspace @chatify/server build",
     "server:production": "yarn workspace @chatify/server start",
     "app:start": "yarn workspace @chatify/app start",
     "app:xcode": "yarn workspace @chatify/app xcode",
     "app:studio": "yarn workspace @chatify/app studio"
+  },
+  "dependencies": {
+    "rimraf": "^2.6.3"
   }
 }
