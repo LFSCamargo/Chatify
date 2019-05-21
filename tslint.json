@@ -1,0 +1,45 @@
+{
+  "defaultSeverity": "warning",
+  "extends": [
+    "tslint:recommended",
+    "tslint-react",
+    "tslint-config-airbnb",
+    "tslint-config-prettier",
+    "tslint-plugin-graphql"
+  ],
+  "jsRules": {},
+  "rules": {
+    "no-bitwise": false,
+    "graphql": [
+      true,
+      {
+        "env": "apollo",
+        "schemaJsonFilepath": "./data/schema.json"
+      }
+    ],
+    "no-unused-variable": true,
+    "quotemark": [true, "single"],
+    "prefer-for-of": false,
+    "no-increment-decrement": false,
+    "ordered-imports": false,
+    "jsx-no-lambda": false,
+    "curly": false,
+    "function-name": false,
+    "import-name": false,
+    "interface-name": false,
+    "jsx-boolean-value": false,
+    "jsx-no-multiline-js": false,
+    "member-access": false,
+    "no-console": [false, "debug", "dir", "log", "trace", "warn"],
+    "no-empty-interface": false,
+    "object-literal-sort-keys": false,
+    "object-shorthand-properties-first": false,
+    "semicolon": false,
+    "strict-boolean-expressions": false,
+    "ter-arrow-parens": false,
+    "ter-indent": false,
+    "no-else-after-return": false,
+    "variable-name": [true, "allow-leading-underscore", "allow-pascal-case", "ban-keywords", "check-format"]
+  },
+  "rulesDirectory": []
+}

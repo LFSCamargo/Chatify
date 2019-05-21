@@ -1,0 +1,51 @@
+{
+  "name": "@chatify/server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.ts",
+  "scripts": {
+    "docker:up": "docker-compose up --build",
+    "watch": "nodemon --watch 'src/**/*.ts' --ignore 'src/**/*.spec.ts' --exec 'ts-node' src/server.ts",
+    "clear": "rimraf build/",
+    "dev": "npm run clear && webpack --config webpack.dev.js",
+    "build:webpack": "npm run clear && webpack --config webpack.prod.js",
+    "start": "npm rum build:webpack && node build/server.js",
+    "config:local": "cp .env.example .env"
+  },
+  "keywords": [
+    "apollo-server",
+    "apollo",
+    "graphql",
+    "typescript"
+  ],
+  "author": "LFSCamargo",
+  "license": "MIT",
+  "dependencies": {
+    "apollo-server": "^2.2.2",
+    "babel-loader": "^8.0.6",
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^8.0.0",
+    "graphql": "^14.0.2",
+    "graphql-tag": "^2.10.0",
+    "jsonwebtoken": "^8.4.0",
+    "mongoose": "^5.3.13",
+    "ramda": "^0.26.1",
+    "ts-node": "^7.0.1",
+    "typescript": "^3.1.6"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.2",
+    "@types/dotenv": "^6.1.1",
+    "@types/jsonwebtoken": "^8.3.0",
+    "@types/mongoose": "^5.3.1",
+    "@types/ramda": "^0.25.46",
+    "auto-reload-webpack-plugin": "^1.1.0",
+    "awesome-ts-loader": "^1.3.1",
+    "nodemon": "^1.18.6",
+    "ts-loader": "^6.0.1",
+    "webpack": "^4.31.0",
+    "webpack-cli": "^3.3.2",
+    "webpack-merge": "^4.2.1",
+    "webpack-node-externals": "^1.7.2"
+  }
+}

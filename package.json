@@ -1,0 +1,48 @@
+{
+  "private": true,
+  "name": "chatify",
+  "workspaces": [
+    "packages/*"
+  ],
+  "nohoist": [],
+  "devDependencies": {
+    "@types/graphql": "^14.0.4",
+    "husky": "^2.3.0",
+    "lint-staged": "^8.1.7",
+    "prettier": "^1.17.1",
+    "tslint": "^5.11.0",
+    "tslint-config-airbnb": "^5.11.1",
+    "tslint-config-prettier": "^1.17.0",
+    "tslint-react": "^3.6.0"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "prettier --write",
+      "tslint --fix",
+      "git add"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "yarn precommit",
+      "pre-push": "yarn lint"
+    }
+  },
+  "scripts": {
+    "precommit": "lint-staged",
+    "postinstall": "rimraf .git/hooks/pre-push && yarn app:codegen",
+    "server:dev": "yarn workspace @chatify/server dev",
+    "server:config:local": "yarn workspace @chatify/server config:local",
+    "server:build": "yarn workspace @chatify/server build",
+    "server:production": "yarn workspace @chatify/server start",
+    "app:ios": "yarn workspace @chatify/app ios",
+    "app:codegen": "yarn workspace @chatify/app codegen",
+    "app:android": "yarn workspace @chatify/app android",
+    "app:start": "yarn workspace @chatify/app start",
+    "app:xcode": "yarn workspace @chatify/app xcode",
+    "app:studio": "yarn workspace @chatify/app studio"
+  },
+  "dependencies": {
+    "rimraf": "^2.6.3"
+  }
+}
