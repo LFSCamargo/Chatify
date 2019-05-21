@@ -10,6 +10,7 @@ const pubsub = new PubSub()
 const server = new ApolloServer({
   resolvers,
   typeDefs: graphqlTypes,
+  // @ts-ignore
   context: async ({ req, connection }) => {
     if (connection) {
       return {

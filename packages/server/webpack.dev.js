@@ -10,6 +10,9 @@ module.exports = {
   entry: {
     server: ['webpack/hot/poll?1000', './src/server.ts'],
   },
+  stats: {
+    warnings: false
+  },
   node: {
     __filename: false,
     __dirname: false,

@@ -6,6 +6,9 @@ module.exports = {
   entry: {
     server: ['./src/server.ts'],
   },
+  stats: {
+    warnings: false
+  },
   mode: 'production',
   target: 'node',
   node: {

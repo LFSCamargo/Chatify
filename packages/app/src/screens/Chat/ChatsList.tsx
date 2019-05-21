@@ -237,6 +237,47 @@ const ChatList = (props: Props) => {
     },
   })
 
+  console.log(props);
+
+  React.useEffect(
+    () => {
+      if (!loading && !error) {
+        if (props.chattingUser === '') {
+          props.data.startPolling(500)
+        } else {
+          props.data.stopPolling()
+        }
+      }
+    },
+    [props.chattingUser, props.data.loading],
+  )
+
+  React.useEffect(() => {
+    if (!loading && !error) {
+      props.data.subscribeToMore({
+        document: WEBRTC_SUBSCRIPTION,
+        variables: {
+          id: me._id,
+        },
+        updateQuery: async (_, { subscriptionData }) => {
+          const { callID, type, fromUser, chat, message } = subscriptionData.data.webRTCMessage
+          const Busy = await RNCallKit.checkIfBusy()
+          if (Busy) {
+            await refuseCall(callID, chat._id, CALL_TYPES.BUSY)
+          }
+  
+          if (type === 'offer') {
+            RNCallKit.displayIncomingCall(callID, fromUser, '', 'generic', true)
+            RNCallKit.addEventListener('endCall', () =>
+              refuseCall(callID, chat._id, CALL_TYPES.REJECT),
+            )
+            RNCallKit.addEventListener('answerCall', () => answerCall(callID, chat._id, fromUser, message))
+          }
+        },
+      })
+    }
+  }, [props.data.loading])
+
   const goToChat = (_id: string, userId: string, user: string) => {
     props.setChattingUser(user)
     props.navigation.navigate(Routes.ChatScreen, {
@@ -359,41 +400,6 @@ const ChatList = (props: Props) => {
       } as SendRTCMessageVariables,
     })
   }
-
-  React.useEffect(
-    () => {
-      if (props.chattingUser === '') {
-        props.data.startPolling(500)
-      } else {
-        props.data.stopPolling()
-      }
-    },
-    [props.chattingUser],
-  )
-
-  React.useEffect(() => {
-    props.data.subscribeToMore({
-      document: WEBRTC_SUBSCRIPTION,
-      variables: {
-        id: me._id,
-      },
-      updateQuery: async (_, { subscriptionData }) => {
-        const { callID, type, fromUser, chat, message } = subscriptionData.data.webRTCMessage
-        const Busy = await RNCallKit.checkIfBusy()
-        if (Busy) {
-          await refuseCall(callID, chat._id, CALL_TYPES.BUSY)
-        }
-
-        if (type === 'offer') {
-          RNCallKit.displayIncomingCall(callID, fromUser, '', 'generic', true)
-          RNCallKit.addEventListener('endCall', () =>
-            refuseCall(callID, chat._id, CALL_TYPES.REJECT),
-          )
-          RNCallKit.addEventListener('answerCall', () => answerCall(callID, chat._id, fromUser, message))
-        }
-      },
-    })
-  }, [])
 
   return (
     <Wrapper>

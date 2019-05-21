@@ -3,6 +3,8 @@ import userModel from '../user/userModel'
 import * as R from 'ramda';
 import { GraphQLContext } from '../../graphqlTypes'
 import { SUBSCRIPTION_TRIGGERS } from '../../constants/const'
+import * as moment from 'moment';
+import console = require('console');
 
 interface ChatQuery {
   _id: string
@@ -68,6 +70,7 @@ export default {
 
       const chat = new chatModel({
         users: [user._id, otherUser],
+        updatedAt: moment().toISOString(),
       })
 
       await chat.save()
@@ -119,12 +122,12 @@ export default {
         {
           user: user._id,
           message,
-          createdAt: new Date(),
+          createdAt: moment().toISOString(),
         },
       ]
 
       await chat.update({
-        updatedAt: new Date(),
+        updatedAt: moment().toISOString(),
         messages: newMessages,
         lastMessage: message,
       })

@@ -41,14 +41,14 @@ const Schema = new mongoose.Schema(
     lastMessage: {
       type: String,
       required: false,
-    }
+    },
+    updatedAt: {
+      type: String,
+      required: true,
+    },
   },
   {
     collection: 'chat',
-    timestamps: {
-      createdAt: 'createdAt',
-      updatedAt: 'updatedAt',
-    },
   },
 )
 

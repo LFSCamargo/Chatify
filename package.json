@@ -1,7 +1,15 @@
 {
   "private": true,
   "name": "Chatify",
-  "workspaces": ["packages/*"],
+  "workspaces": [
+    "packages/*"
+  ],
+  "nohoist": [
+    "**/graphql/**"
+  ],
+  "devDependencies": {
+    "@types/graphql": "^14.0.4"
+  },
   "scripts": {
     "server:dev": "yarn workspace @chatify/server dev",
     "server:build": "yarn workspace @chatify/server build",
