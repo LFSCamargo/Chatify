@@ -31,6 +31,7 @@ const authLink = setContext(async (_, { headers }) => {
 
 const link = split(
   ({ query }) => {
+    // @ts-ignore
     const { kind, operation } = getMainDefinition(query)
     return kind === 'OperationDefinition' && operation === 'subscription'
   },
@@ -44,6 +45,7 @@ const stateLink = withClientState({
   cache,
   resolvers: {
     Mutation: {
+      // @ts-ignore
       updateNetworkStatus: (_, { isConnected }, { cache }) => {
         const data = {
           networkStatus: {
