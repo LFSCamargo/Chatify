@@ -56,6 +56,15 @@ Also im preparing a blog Post to show you guys the processes and the troubles th
          </a>
       </td>
       <td align="center">
+         <a href="https://github.com/jgcmarins">
+         <img src="https://avatars1.githubusercontent.com/u/5133450?s=460&v=4" width="100px;" alt="Joao"/>
+         <br />
+         <sub>
+         <b>Joao Marins</b>
+         </esub>
+         </a>
+      </td>
+      <td align="center">
          <a href="https://github.com/jaburcodes">
          <img src="https://avatars1.githubusercontent.com/u/13947203?s=460&v=4" width="100px;" alt="Jabur"/>
          <br />
