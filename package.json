@@ -30,10 +30,14 @@
   },
   "scripts": {
     "precommit": "lint-staged",
-    "postinstall": "rimraf .git/hooks/pre-push",
+    "postinstall": "rimraf .git/hooks/pre-push && yarn app:codegen",
     "server:dev": "yarn workspace @chatify/server dev",
+    "server:config:local": "yarn workspace @chatify/server config:local",
     "server:build": "yarn workspace @chatify/server build",
     "server:production": "yarn workspace @chatify/server start",
+    "app:ios": "yarn workspace @chatify/app ios",
+    "app:codegen": "yarn workspace @chatify/app codegen",
+    "app:android": "yarn workspace @chatify/app android",
     "app:start": "yarn workspace @chatify/app start",
     "app:xcode": "yarn workspace @chatify/app xcode",
     "app:studio": "yarn workspace @chatify/app studio"

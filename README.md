@@ -10,6 +10,18 @@ The idea for this open source project is to show how we can use GraphQL Subscrip
 
 Also im preparing a blog Post to show you guys the processes and the troubles that i passed through.
 
+# How to run the app
+
+1. First install the dependencies `yarn install`
+2. Copy the env file to .env `yarn server:config:local`
+3. Run the server `yarn server:dev`
+4. Start packager `yarn app:start`
+5. Run on ios or android `yarn app:ios` or `yarn app:android`
+
+### PS: You need to have mongo installed on your machine
+
+### PPS: Android device or AVD must be running so reat native will be able to find the device to deal with the installation
+
 # Main Libraries Used to do the dirty job
 
 ## Backend:

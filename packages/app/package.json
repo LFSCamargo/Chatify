@@ -6,6 +6,7 @@
     "format": "prettier --write '{.,__tests__,src/**}/*.{js,jsx,ts,tsx}'",
     "start": "node ../../node_modules/react-native/local-cli/cli.js start --projectRoot ../../",
     "studio": "open -a /Applications/Android\\ Studio.app ./android/",
+    "android": "react-native run-android",
     "test": "jest",
     "prettier:all": "prettier 'src/**/*.ts*' --write",
     "xcode": "open ios/$npm_package_name.xcodeproj",
