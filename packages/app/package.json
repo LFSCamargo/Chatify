@@ -4,11 +4,9 @@
   "private": true,
   "scripts": {
     "format": "prettier --write '{.,__tests__,src/**}/*.{js,jsx,ts,tsx}'",
-    "lint": "tslint -p .",
     "start": "node ../../node_modules/react-native/local-cli/cli.js start --projectRoot ../../",
     "studio": "open -a /Applications/Android\\ Studio.app ./android/",
     "test": "jest",
-    "precommit": "lint-staged",
     "prettier:all": "prettier 'src/**/*.ts*' --write",
     "xcode": "open ios/$npm_package_name.xcodeproj",
     "ios": "react-native run-ios",
@@ -88,17 +86,6 @@
     "react-native-typescript-transformer": "^1.2.10",
     "react-test-renderer": "16.8.3",
     "ts-jest": "^23.10.5",
-    "tslint": "^5.11.0",
-    "tslint-config-airbnb": "^5.11.1",
-    "tslint-config-prettier": "^1.17.0",
-    "tslint-react": "^3.6.0",
     "typescript": "^3.2.1"
-  },
-  "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "prettier --write",
-      "tslint --fix",
-      "git add"
-    ]
   }
 }

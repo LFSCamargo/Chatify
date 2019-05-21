@@ -1,0 +1,18 @@
+{
+  "[javascript]": {
+    "editor.formatOnSave": true
+  },
+  "editor.formatOnPaste": false,
+  "eslint.autoFixOnSave": true,
+  "editor.tabSize": 2,
+  "editor.renderWhitespace": "all",
+  "extensions.ignoreRecommendations": false,
+  "editor.formatOnSave": true,
+  "eslint.alwaysShowStatus": true,
+  "prettier.disableLanguages": ["js"],
+  "prettier.requireConfig": true,
+  "javascript.updateImportsOnFileMove.enabled": "never",
+  "tslint.autoFixOnSave": true,
+  "tslint.alwaysShowStatus": true,
+  "typescript.tsdk": "node_modules/typescript/lib"
+}

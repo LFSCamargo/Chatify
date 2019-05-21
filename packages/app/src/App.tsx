@@ -23,6 +23,7 @@ const App = () => {
   const [token, setToken] = React.useState('')
 
   const getToken = async () => {
+    // AsyncStorage.clear()
     const token = await AsyncStorage.getItem('token')
 
     setToken(token || '')
@@ -41,7 +42,7 @@ const App = () => {
           <ThemeProvider theme={Theme}>
             <InAppNotificationProvider>
               <View style={{ flex: 1 }}>
-                <StatusBar barStyle="light-content" backgroundColor={Theme.colors.primary} />
+                <StatusBar barStyle='light-content' backgroundColor={Theme.colors.primary} />
                 <Router />
               </View>
             </InAppNotificationProvider>
