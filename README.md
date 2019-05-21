@@ -14,20 +14,20 @@ Also im preparing a blog Post to show you guys the processes and the troubles th
 
 ## Backend:
 
-- ### GraphQL
-- ### Mongoose
-- ### Jest
-- ### Apollo Server
-- ### GraphQL Tag
+- GraphQL
+- Mongoose
+- Jest
+- Apollo Server
+- GraphQL Tag
 
 ## Front End:
 
-- ### React Native
-- ### React Apollo
-- ### React
-- ### Jest
-- ### React Native WebRTC
-- ### React Apollo Hooks
+- React Native
+- React Apollo
+- React
+- Jest
+- React Native WebRTC
+- React Apollo Hooks
 
 # Mentions:
 
