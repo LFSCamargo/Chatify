@@ -60,6 +60,7 @@
 		9D42DB59228B616100AF470B /* libc.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 9D42DB58228B616100AF470B /* libc.tbd */; };
 		9D42DB5B228B616600AF470B /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 9D42DB5A228B616600AF470B /* libc++.tbd */; };
 		9D42DB5D228B616B00AF470B /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 9D42DB5C228B616B00AF470B /* libsqlite3.tbd */; };
+		9D9E43D02294A5FF0058BFFA /* libRCTWebRTC.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9DC9914D22936B97008CE327 /* libRCTWebRTC.a */; };
 		9DC9918E22938B56008CE327 /* JavaScriptCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED297162215061F000B7C4FE /* JavaScriptCore.framework */; };
 		AD75C11A20B546779430735E /* libRNFetchBlob.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DA8EB37FAE8B4C11AAA14391 /* libRNFetchBlob.a */; };
 		ADBDB9381DFEBF1600ED6528 /* libRCTBlob.a in Frameworks */ = {isa = PBXBuildFile; fileRef = ADBDB9271DFEBF0700ED6528 /* libRCTBlob.a */; };
@@ -485,6 +486,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9D9E43D02294A5FF0058BFFA /* libRCTWebRTC.a in Frameworks */,
 				9DC9918E22938B56008CE327 /* JavaScriptCore.framework in Frameworks */,
 				9D42DB5D228B616B00AF470B /* libsqlite3.tbd in Frameworks */,
 				9D42DB5B228B616600AF470B /* libc++.tbd in Frameworks */,
