@@ -35,7 +35,7 @@ declare module 'react-native-in-app-notification' {
 }
 
 declare module 'react-native-webrtc' {
-  //   import { ComponentClass } from 'react'
+  import { ComponentClass } from 'react'
 
   type RTCIceConnectionState = 'new' | 'checking' | 'connected' | 'completed' | 'failed' | 'disconnected' | 'closed'
   type RTCIceGatheringState = 'new' | 'gathering' | 'complete'
