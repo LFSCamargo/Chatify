@@ -43,6 +43,7 @@
     "app:studio": "yarn workspace @chatify/app studio"
   },
   "dependencies": {
-    "rimraf": "^2.6.3"
+    "rimraf": "^2.6.3",
+    "tslint-plugin-graphql": "^0.0.6"
   }
 }
