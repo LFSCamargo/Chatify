@@ -27,6 +27,7 @@ import { Routes } from '../../config/Router'
 import { SendRTCMessageVariables } from './__generated__/SendRTCMessage'
 import { ReduxState } from '../../ducks'
 import { Dispatch } from 'redux'
+import CallModal from './CallModal'
 
 const Wrapper = styled(SafeAreaView)`
   flex: 1;
@@ -161,6 +162,7 @@ const SmallText = styled.Text`
   font-size: 12;
   font-family: 'Rubik';
   color: rgba(255, 255, 255, 0.5);
+  width: 180;
 `
 
 const TextContainer = styled.View`
@@ -205,12 +207,27 @@ const WEBRTC_SUBSCRIPTION = gql`
       callID
       type
       message
+      fromUser
       chat {
         _id
+        users {
+          _id
+          name
+          email
+        }
       }
     }
   }
 `
+
+interface SetCalling {
+  visible: boolean
+  callingUserName: string
+  callingEmail: string
+  callId: string
+  chatId: string
+  sdp: any
+}
 
 type Props = NavigationInjectedProps &
   ShowNotificationProps & {
@@ -222,22 +239,16 @@ type Props = NavigationInjectedProps &
 const ChatList = (props: Props) => {
   const { loading, error, me, chats } = props.data
   const [isFetchingEnd, setFetchingEnd] = React.useState(false)
-
-  const sendRTCMessage = Apollo.useMutation(WEBRTC_SEND_MESSAGE)
-
-  RNCallKit.setup({
-    ios: {
-      appName: 'Chatify',
-    },
-    android: {
-      alertTitle: 'Permissions required',
-      alertDescription: 'This application needs to access your phone accounts',
-      cancelButton: 'Cancel',
-      okButton: 'ok',
-    },
+  const [calling, setCalling] = React.useState<SetCalling>({
+    visible: false,
+    callingUserName: '',
+    callingEmail: '',
+    sdp: null,
+    callId: '',
+    chatId: '',
   })
 
-  console.log(props)
+  const sendRTCMessage = Apollo.useMutation(WEBRTC_SEND_MESSAGE)
 
   React.useEffect(() => {
     if (!loading && !error) {
@@ -251,6 +262,18 @@ const ChatList = (props: Props) => {
 
   React.useEffect(() => {
     if (!loading && !error) {
+      RNCallKit.setup({
+        ios: {
+          appName: 'Chatify',
+        },
+        android: {
+          alertTitle: 'Permissions required',
+          alertDescription: 'This application needs to access your phone accounts',
+          cancelButton: 'Cancel',
+          okButton: 'ok',
+        },
+      })
+
       props.data.subscribeToMore({
         document: WEBRTC_SUBSCRIPTION,
         variables: {
@@ -263,14 +286,17 @@ const ChatList = (props: Props) => {
             await refuseCall(callID, chat._id, CALL_TYPES.BUSY)
           }
 
-          if (type === 'offer') {
-            RNCallKit.displayIncomingCall(callID, fromUser, '', 'generic', true)
-            RNCallKit.addEventListener('endCall', () =>
-              refuseCall(callID, chat._id, CALL_TYPES.REJECT),
-            )
-            RNCallKit.addEventListener('answerCall', () =>
-              answerCall(callID, chat._id, fromUser, message),
-            )
+          const chatUser = chat.users.filter((e: any) => e._id === fromUser)[0]
+
+          if (type === 'DIAL_SDP') {
+            setCalling({
+              callId: callID,
+              callingUserName: chatUser.name,
+              callingEmail: chatUser.email,
+              sdp: message,
+              visible: true,
+              chatId: chat._id,
+            })
           }
         },
       })
@@ -317,9 +343,9 @@ const ChatList = (props: Props) => {
               </SmallText>
             </TextContainer>
           </AvatarAndText>
-          {/* <CallButton onPress={() => goToCall(user && user.name || '', _id || '')}>
+          <CallButton onPress={() => goToCall((user && user.name) || '', _id || '')}>
             <CallIcon />
-          </CallButton> */}
+          </CallButton>
         </Row>
       </TouchableOpacity>
     )
@@ -379,9 +405,21 @@ const ChatList = (props: Props) => {
     )
   }
 
+  const resetModal = () => {
+    setCalling({
+      visible: false,
+      callingUserName: '',
+      callingEmail: '',
+      sdp: null,
+      callId: '',
+      chatId: '',
+    })
+  }
+
   const answerCall = (callID: string, chatId: string, fromUser: string, sdp: any) => {
+    resetModal()
     props.navigation.navigate(Routes.CallScreen, {
-      calling: true,
+      calling: false,
       callID,
       callUser: fromUser,
       sdp,
@@ -390,6 +428,7 @@ const ChatList = (props: Props) => {
   }
 
   const refuseCall = (callID: string, chatID: string, callType: string) => {
+    resetModal()
     sendRTCMessage({
       variables: {
         id: chatID,
@@ -429,6 +468,15 @@ const ChatList = (props: Props) => {
       >
         <PlusIcon />
       </Fab>
+      <CallModal
+        callingUserPic={gravatarURL(calling.callingEmail)}
+        callingUser={calling.callingUserName}
+        visible={calling.visible}
+        acceptCall={() =>
+          answerCall(calling.callId, calling.chatId, calling.callingUserName, calling.sdp)
+        }
+        rejectCall={() => refuseCall(calling.callId, calling.chatId, CALL_TYPES.REJECT)}
+      />
     </Wrapper>
   )
 }
