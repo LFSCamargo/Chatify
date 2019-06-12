@@ -343,7 +343,11 @@ const ChatList = (props: Props) => {
               </SmallText>
             </TextContainer>
           </AvatarAndText>
-          <CallButton onPress={() => goToCall((user && user.name) || '', _id || '')}>
+          <CallButton
+            onPress={() =>
+              goToCall((user && user.name) || '', _id || '', (user && user.email) || '')
+            }
+          >
             <CallIcon />
           </CallButton>
         </Row>
@@ -351,7 +355,7 @@ const ChatList = (props: Props) => {
     )
   }
 
-  const goToCall = (callUser: string, chatId: string) => {
+  const goToCall = (callUser: string, chatId: string, callUserEmail: string) => {
     const callID = createUUID()
 
     props.navigation.navigate(Routes.CallScreen, {
@@ -359,6 +363,7 @@ const ChatList = (props: Props) => {
       callID,
       callUser,
       chatId,
+      callUserEmail,
     })
   }
 
@@ -416,12 +421,19 @@ const ChatList = (props: Props) => {
     })
   }
 
-  const answerCall = (callID: string, chatId: string, fromUser: string, sdp: any) => {
+  const answerCall = (
+    callID: string,
+    chatId: string,
+    fromUser: string,
+    sdp: any,
+    callUserEmail: string,
+  ) => {
     resetModal()
     props.navigation.navigate(Routes.CallScreen, {
       calling: false,
       callID,
       callUser: fromUser,
+      callUserEmail,
       sdp,
       chatId,
     })
@@ -473,7 +485,13 @@ const ChatList = (props: Props) => {
         callingUser={calling.callingUserName}
         visible={calling.visible}
         acceptCall={() =>
-          answerCall(calling.callId, calling.chatId, calling.callingUserName, calling.sdp)
+          answerCall(
+            calling.callId,
+            calling.chatId,
+            calling.callingUserName,
+            calling.sdp,
+            calling.callingEmail,
+          )
         }
         rejectCall={() => refuseCall(calling.callId, calling.chatId, CALL_TYPES.REJECT)}
       />

@@ -5,7 +5,9 @@ import {
   RTCIceCandidate,
   RTCSessionDescription,
   RTCView,
-  mediaDevices,
+  getUserMedia,
+  MediaStreamTrack,
+  SourceInfo,
 } from 'react-native-webrtc'
 import * as Apollo from 'react-apollo-hooks'
 import { graphql, GraphqlQueryControls } from 'react-apollo'
@@ -15,9 +17,10 @@ import idx from 'idx'
 import { NavigationInjectedProps } from 'react-navigation'
 import gql from 'graphql-tag'
 import { CallScreenQuery_me } from './__generated__/CallScreenQuery'
-import { CALL_TYPES } from '../../config/utils'
+import { CALL_TYPES, gravatarURL } from '../../config/utils'
 import { SendRTCMessageVariables } from './__generated__/SendRTCMessage'
 import { StyledComponentClass } from 'styled-components'
+import { iceServers } from '../../config/config'
 
 const { width, height } = Dimensions.get('window')
 const HEIGHT_SMALL_VIDEO = Math.round(height * 0.2)
@@ -32,6 +35,8 @@ const PeerVideoPlaceHolder = styled.View`
   right: 0;
   top: 0;
   bottom: 0;
+  align-items: center;
+  justify-content: center;
 `
 
 const LocalVideoPlaceHolder = styled.View`
@@ -54,6 +59,8 @@ const PeerVideo = styled(RTCView)`
   right: 0;
   top: 0;
   bottom: 0;
+  align-items: center;
+  justify-content: center;
 `
 
 const LocalVideo: StyledComponentClass<any, any> = styled(RTCView).attrs({
@@ -153,11 +160,43 @@ const AlignAtCenter = styled.View`
   justify-content: center;
 `
 
+const UserProfile = styled.Image`
+  width: 100;
+  height: 100;
+  border-radius: 10;
+`
+
+const WrapperImageAndName = styled.View`
+  width: ${width - 40};
+  align-items: center;
+  justify-content: center;
+`
+
+const ChatifyState = styled.Text`
+  font-family: 'Rubik';
+  color: white;
+  font-size: 20;
+  text-align: center;
+  margin-top: 20;
+  width: ${width - 80};
+`
+
+const ChatifyUser = styled.Text`
+  font-family: 'Rubik';
+  color: white;
+  font-size: 16;
+  text-align: center;
+  margin-top: 10;
+  width: ${width - 80};
+  margin-bottom: 20;
+`
+
 interface Params {
   calling: boolean
   sdp: string
   chatId: string
   callUser: string
+  callUserEmail: string
   callID: string
 }
 
@@ -197,10 +236,13 @@ const CallScreen = (props: Props) => {
   const [peerVideo, setPeerVideo] = React.useState(true)
   const [stream, setStream] = React.useState<any>(null)
   const [remoteStream, setRemoteStream] = React.useState<any>(null)
+  const [callState, setCallState] = React.useState<'Ringing' | 'Connecting' | 'Connected'>(
+    'Ringing',
+  )
   const mutation = Apollo.useMutation(mutationDoc)
 
   const pc = new RTCPeerConnection({
-    iceServers: [{ url: 'stun:stun.l.google.com:19302' }],
+    iceServers,
   })
 
   const sendSDP = async (sdp: object, type: string) => {
@@ -253,16 +295,17 @@ const CallScreen = (props: Props) => {
 
   React.useEffect(() => {
     if (!loading && !error) {
-      mediaDevices.enumerateDevices().then((sourceInfos: any) => {
+      MediaStreamTrack.getSources((sourceInfos: SourceInfo[]) => {
+        console.log('MediaStreamTrack.getSources', sourceInfos)
         let videoSourceId
-        for (let index = 0; index < sourceInfos.length; index++) {
-          const sourceInfo = sourceInfos[index]
+        for (let i = 0; i < sourceInfos.length; i++) {
+          const sourceInfo = sourceInfos[i]
           if (sourceInfo.kind === 'video' && sourceInfo.facing === 'front') {
             videoSourceId = sourceInfo.id
           }
         }
-        mediaDevices
-          .getUserMedia({
+        getUserMedia(
+          {
             audio: true,
             video: {
               mandatory: {
@@ -273,109 +316,121 @@ const CallScreen = (props: Props) => {
               facingMode: 'user',
               optional: videoSourceId ? [{ sourceId: videoSourceId }] : [],
             },
-          })
-          .then((receivedStream: any) => {
-            // Got Local Stream!
+          },
+          receivedStream => {
             setStream(receivedStream)
-          })
-          .catch((e: any) => {
-            console.log('Error While Get The Local Stream', e)
-            Alert.alert('Error', 'Error getting the local stream')
-          })
-
-        const sdp = idx(props.navigation.state.params, _ => _.sdp)
-        const calling = idx(props.navigation.state.params, _ => _.calling)
-
-        // Starts the WebRTC Logic
-        if (calling === true) {
-          console.log('CRIANDO OFERTA')
-          pc.createOffer()
-            .catch(e => console.log('ERRO', e))
-            .then((desc: any) => {
-              console.log('SDP', desc)
-              pc.setLocalDescription(desc).then(() => {
-                // Send Offer to the Peer
-                console.log('MANDOU DIAL')
-                sendSDP(desc, CALL_TYPES.DIAL_SDP)
-              })
-            })
-        } else {
-          // Receives the sdp and parse
-          const remoteDescription = new RTCSessionDescription(JSON.parse(sdp || ''))
-          console.log('SETOU DIAL')
-          pc.setRemoteDescription(remoteDescription).then(() => {
-            pc.createAnswer().then((answer: any) => {
-              pc.setLocalDescription(answer).then(() => {
-                // Send Answer to the Peer
-                console.log('MANDOU ANSWER')
-                sendSDP(answer, CALL_TYPES.ANSWER_SDP)
-              })
-            })
-          })
-        }
-        console.log('BATEU')
-        props.data.subscribeToMore({
-          document: CallSub,
-          onError: e => console.log('Subscription Error: ', e),
-          variables: {
-            id: props.data.me._id,
+            pc.addStream(receivedStream)
           },
-          updateQuery: (_, { subscriptionData }) => {
-            const { type, message } = subscriptionData.data.webRTCMessage
-            // Other peer answered
-            if (type === CALL_TYPES.ANSWER_SDP) {
-              console.log('SETOU ANSWER')
-              const answerSDP = new RTCSessionDescription(JSON.parse(message))
-              return pc.setRemoteDescription(answerSDP).then(() => {
-                console.log('Connection now should be fine!')
-              })
-            }
-            // Other peer sended a ice candidate
-            if (type === CALL_TYPES.ICE_CANDIDATE) {
-              console.log('SETOU ICE')
-              const iceCandidate = new RTCIceCandidate(JSON.parse(message))
-              return pc.addIceCandidate(iceCandidate)
-            }
-            // Other peer is Busy
-            if (type === CALL_TYPES.BUSY) {
-              pc.close()
-              Alert.alert('Busy', 'The other peer is on a call right now')
-              return props.navigation.goBack()
-            }
-            // Other peer rejected the call or hangup
-            if (type === CALL_TYPES.REJECT || type === CALL_TYPES.HANGUP) {
-              console.log('FIM')
-              pc.close()
-              return props.navigation.goBack()
-            }
-            // Other peer enabled the camera
-            if (type === CALL_TYPES.ENABLE_CAMERA) {
-              return setPeerVideo(true)
-            }
-            // Other peer disabled the camera
-            if (type === CALL_TYPES.DISABLE_CAMERA) {
-              return setPeerVideo(false)
-            }
+          e => {
+            console.log('Oops, we getting error', e)
           },
-        })
+        )
 
-        pc.onicecandidate = (event: any) => {
-          // Send Candidate to the other peer
-          if (event.candidate) {
-            console.log('SEND CANDIDATE')
-            sendCandidate(event.candidate)
+        setTimeout(() => {
+          const sdp = idx(props.navigation.state.params, _ => _.sdp)
+          const calling = idx(props.navigation.state.params, _ => _.calling)
+
+          // Starts the WebRTC Logic
+          if (calling === true) {
+            pc.createOffer(
+              desc => {
+                pc.setLocalDescription(
+                  desc,
+                  () => {
+                    sendSDP(desc, CALL_TYPES.DIAL_SDP)
+                  },
+                  e => console.log(e),
+                )
+              },
+              e => console.log(e),
+            )
+          } else {
+            // Receives the sdp and parse
+            const remoteDescription = new RTCSessionDescription(JSON.parse(sdp || ''))
+
+            pc.setRemoteDescription(
+              remoteDescription,
+              () => {
+                pc.createAnswer(
+                  answer => {
+                    pc.setLocalDescription(
+                      answer,
+                      () => {
+                        setCallState('Connecting')
+                        sendSDP(answer, CALL_TYPES.ANSWER_SDP)
+                      },
+                      e => console.log(e),
+                    )
+                  },
+                  e => console.log(e),
+                )
+              },
+              e => console.log(e),
+            )
           }
-        }
+          props.data.subscribeToMore({
+            document: CallSub,
+            onError: e => console.log('Subscription Error: ', e),
+            variables: {
+              id: props.data.me._id,
+            },
+            updateQuery: (_, { subscriptionData }) => {
+              const { type, message } = subscriptionData.data.webRTCMessage
+              console.log(subscriptionData.data.webRTCMessage)
+              // Other peer answered
+              if (type === CALL_TYPES.ANSWER_SDP) {
+                if (props.navigation.getParam('calling')) setCallState('Connecting')
+                const answerSDP = new RTCSessionDescription(JSON.parse(message))
+                return pc.setRemoteDescription(answerSDP, () => {
+                  setCallState('Connecting')
+                })
+              }
+              // Other peer sended a ice candidate
+              if (type === CALL_TYPES.ICE_CANDIDATE) {
+                const iceCandidate = new RTCIceCandidate(JSON.parse(message))
+                return pc.addIceCandidate(iceCandidate)
+              }
+              // Other peer is Busy
+              if (type === CALL_TYPES.BUSY) {
+                pc.close()
+                Alert.alert('Busy', 'The other peer is on a call right now')
+                return props.navigation.goBack()
+              }
+              // Other peer rejected the call or hangup
+              if (type === CALL_TYPES.REJECT || type === CALL_TYPES.HANGUP) {
+                pc.close()
+                return props.navigation.goBack()
+              }
+              // Other peer enabled the camera
+              if (type === CALL_TYPES.ENABLE_CAMERA) {
+                return setPeerVideo(true)
+              }
+              // Other peer disabled the camera
+              if (type === CALL_TYPES.DISABLE_CAMERA) {
+                return setPeerVideo(false)
+              }
+            },
+          })
 
-        pc.onaddstream = (event: any) => {
-          console.log('RECEBEU STREAM', event)
-          setRemoteStream(event.stream)
-        }
+          pc.onicecandidate = (event: any) => {
+            // Send Candidate to the other peer
+            if (event.candidate) {
+              console.log('SEND CANDIDATE')
+              sendCandidate(event.candidate)
+            }
+          }
 
-        pc.oniceconnectionstatechange = () => {
-          console.log('Ice Connection State', pc.iceConnectionState)
-        }
-      })
+          pc.onaddstream = (event: any) => {
+            console.log('RECEBEU STREAM', event)
+            setRemoteStream(event.stream)
+            setCallState('Connected')
+          }
+
+          pc.oniceconnectionstatechange = () => {
+            console.log('Ice Connection State', pc.iceConnectionState)
+          }
+        })
+      }, 2000)
     }
   }, [loading])
 
@@ -402,14 +457,22 @@ const CallScreen = (props: Props) => {
   return (
     <Wrapper>
       {!remoteStream || !localVideo ? (
-        <PeerVideoPlaceHolder />
+        <PeerVideoPlaceHolder>
+          <WrapperImageAndName>
+            <UserProfile
+              source={{ uri: gravatarURL(props.navigation.getParam('callUserEmail')) }}
+            />
+            <ChatifyState>{callState === 'Connected' ? 'Video Disabled' : callState}</ChatifyState>
+            <ChatifyUser>{props.navigation.getParam('callUser')}</ChatifyUser>
+          </WrapperImageAndName>
+        </PeerVideoPlaceHolder>
       ) : (
-        <PeerVideo streamURL={remoteStream.toURL()} />
+        <PeerVideo mirror streamURL={remoteStream.toURL()} />
       )}
       {!stream || !peerVideo ? (
         <LocalVideoPlaceHolder />
       ) : (
-        <LocalVideo streamURL={stream.toURL()} />
+        <LocalVideo mirror streamURL={stream.toURL()} />
       )}
       <ButtonsContainer>
         <ActionButtons onPress={() => setLocalVideo(!localVideo)}>
