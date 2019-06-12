@@ -97,19 +97,49 @@ declare module 'react-native-webrtc' {
     release(): void
   }
 
-  class MediaStreamTrack extends EventTarget {
-    constructor(info: any)
-    get enabled(): boolean
-    set enabled(enabled: boolean): void
-    _switchCamera(): void
-    applyConstraints(): Promise<void>
-    clone(): Promise<void>
-    getCapabilities(): Promise<void>
-    getConstraints(): Promise<void>
-    getSettings(): Promise<void>
+  export interface SourceInfo {
+    id: string
+    label: string
+    facing: string
+    kind: string
   }
 
+  interface MediaStreamTrackType {
+    _switchCamera: () => void
+    applyConstraints: () => Promise<void>
+    clone: () => Promise<void>
+    getCapabilities: () => Promise<void>
+    getConstraints: () => Promise<void>
+    getSettings: () => Promise<void>
+    getSources: (success: (sources: SourceInfo[]) => any) => any
+  }
+
+  export const MediaStreamTrack: MediaStreamTrackType
+
+  // class MediaStreamTrack extends EventTarget {
+  //   constructor(info: any)
+  // }
+
   interface EventTarget {}
+
+  interface GetUserMediaOPTS {
+    audio: boolean
+    video: {
+      mandatory: {
+        minWidth: number
+        minHeight: number
+        minFrameRate: number
+      }
+      facingMode: 'user' | 'environment'
+      optional: any
+    }
+  }
+
+  function getUserMedia(
+    constraints: GetUserMediaOPTS,
+    successCallback: (stream: MediaStream) => any,
+    errorCallback: (e: Error) => any,
+  ): void
 
   class MediaDevices extends EventTarget {
     ondevicechange: Function
@@ -140,11 +170,19 @@ declare module 'react-native-webrtc' {
     _subscriptions: any[]
     _dataChannelIds: Set
     constructor(configuration: RTCConfig)
-    createOffer(options?: any): Promise<RTCSessionDescriptionInit>
-    createAnswer(options?: any): Promise<RTCSessionDescriptionInit>
-    setLocalDescription(sessionDescription: RTCSessionDescription): Promise<void>
-    setRemoteDescription(sessionDescription: RTCSessionDescription): Promise<void>
-    addIceCandidate(candidate: RTCIceCandidate): Promise<void>
+    createOffer(callback?: (sdp: RTCSessionDescription) => any, error?: (error: any) => any): void
+    createAnswer(callback?: (sdp: RTCSessionDescription) => any, error?: (error: any) => any): void
+    setLocalDescription(
+      sessionDescription: RTCSessionDescription,
+      callback?: () => any,
+      error?: (error: any) => any,
+    ): Promise<void>
+    setRemoteDescription(
+      sessionDescription: RTCSessionDescription,
+      callback?: () => any,
+      error?: (error: any) => any,
+    ): Promise<void>
+    addIceCandidate(candidate: RTCIceCandidate): any
     close(): void
     addStream(stream: MediaStream): void
     removeStream(stream: MediaStream): void
