@@ -5,11 +5,10 @@
   "main": "server.ts",
   "scripts": {
     "docker:up": "docker-compose up --build",
-    "watch": "nodemon --watch 'src/**/*.ts' --ignore 'src/**/*.spec.ts' --exec 'ts-node' src/server.ts",
     "clear": "rimraf build/",
     "dev": "npm run clear && webpack --config webpack.dev.js",
     "build:webpack": "npm run clear && webpack --config webpack.prod.js",
-    "start": "npm rum build:webpack && node build/server.js",
+    "start": "yarn build:webpack && node build/server.js",
     "config:local": "cp .env.example .env"
   },
   "keywords": [
