@@ -6,8 +6,6 @@ Welcome to Chatify a simple chat application that uses React Native and GraphQL
 
 # Welcome to Chatify a simple chat application that uses React Native and GraphQL
 
-🚧 WEBRTC IN PROGRESS!
-
 The idea for this open source project is to show how we can use GraphQL Subscriptions to deal with Real time updates. And also to show people that WebRTC its not a Monster.
 
 Also im preparing a blog Post to show you guys the processes and the troubles that i passed through.
@@ -19,6 +17,33 @@ Also im preparing a blog Post to show you guys the processes and the troubles th
 3. Run the server `yarn server:dev`
 4. Start packager `yarn app:start`
 5. Run on ios or android `yarn app:ios` or `yarn app:android`
+
+# To test the video calls you need two devices and ngrok to expose the server to the devices!
+
+## PPS: Run the server and the packager before all those steps above
+
+1. run this command `ngrok http 5000` to expose the port to the device will appear something like this
+
+```
+Session Status                online
+Session Expires               7 hours, 47 minutes
+Version                       2.3.29
+Region                        United States (us)
+Web Interface                 http://127.0.0.1:4040
+Forwarding                    http://7963e9cd.ngrok.io -> http://localhost:5000
+Forwarding                    https://7963e9cd.ngrok.io -> http://localhost:5000
+```
+
+2. Copy the fowarding without the `http://` like this `7963e9cd.ngrok.io` and replace on the `config.ts`:
+
+```
+export const GRAPHQL_URI = 'http://something.ngrok.io/graphql'
+export const SUBSCRIPTIONS_URI = 'ws://something.ngrok.io/graphql'
+```
+
+3. Build on the device using XCode
+
+4. And test the video calls ❤️
 
 ### PS: You need to have mongo installed on your machine
 
@@ -37,6 +62,7 @@ Also im preparing a blog Post to show you guys the processes and the troubles th
 ## Front End:
 
 - React Native
+- React Native WebRTC
 - React Apollo
 - React
 - Jest
