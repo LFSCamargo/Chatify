@@ -286,6 +286,7 @@ const ChatScreen: React.FunctionComponent<Props> = props => {
     setLoadingSend(true)
 
     try {
+      // @ts-ignore
       await sendMessageMutation({
         variables: {
           id: idx(props.navigation.state.params, _ => _._id),
@@ -345,7 +346,7 @@ const ChatScreen: React.FunctionComponent<Props> = props => {
   const renderSend = () => {
     return (
       <SendButtonWrapper disabled={loadingSend} onPress={() => mutate()}>
-        {loadingSend && <ActivityIndicator color="white" />}
+        {loadingSend && <ActivityIndicator color='white' />}
         {!loadingSend && <SendButtonIcon />}
       </SendButtonWrapper>
     )
@@ -354,10 +355,10 @@ const ChatScreen: React.FunctionComponent<Props> = props => {
   const renderComposer = () => {
     return (
       <Input
-        placeholder="Write here your message..."
+        placeholder='Write here your message...'
         value={message}
         onChangeText={setMessage}
-        clearButtonMode="while-editing"
+        clearButtonMode='while-editing'
       />
     )
   }
@@ -401,7 +402,7 @@ const ChatScreen: React.FunctionComponent<Props> = props => {
   if (loading) {
     return (
       <AlignAtCenter>
-        <ActivityIndicator animating color="white" />
+        <ActivityIndicator animating color='white' />
       </AlignAtCenter>
     )
   }

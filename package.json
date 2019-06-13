@@ -24,17 +24,16 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "yarn precommit",
-      "pre-push": "yarn lint"
+      "pre-commit": "yarn precommit"
     }
   },
   "scripts": {
     "precommit": "lint-staged",
-    "postinstall": "rimraf .git/hooks/pre-push && yarn app:codegen",
     "server:dev": "yarn workspace @chatify/server dev",
+    "server:start": "yarn workspace @chatify/server start",
+    "server:clear": "yarn workspace @chatify/server clear",
     "server:config:local": "yarn workspace @chatify/server config:local",
-    "server:build": "yarn workspace @chatify/server build",
-    "server:production": "yarn workspace @chatify/server start",
+    "server:build": "yarn workspace @chatify/server build:webpack",
     "app:ios": "yarn workspace @chatify/app ios",
     "app:codegen": "yarn workspace @chatify/app codegen",
     "app:android": "yarn workspace @chatify/app android",
@@ -43,6 +42,7 @@
     "app:studio": "yarn workspace @chatify/app studio"
   },
   "dependencies": {
-    "rimraf": "^2.6.3"
+    "rimraf": "^2.6.3",
+    "tslint-plugin-graphql": "^0.0.6"
   }
 }

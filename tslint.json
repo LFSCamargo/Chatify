@@ -14,7 +14,7 @@
       true,
       {
         "env": "apollo",
-        "schemaJsonFilepath": "./data/schema.json"
+        "schemaJsonFilepath": "./packages/app/data/schema.json"
       }
     ],
     "no-unused-variable": true,

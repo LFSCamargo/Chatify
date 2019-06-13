@@ -4,6 +4,7 @@ import * as dotenv from 'dotenv';
 import graphqlTypes from './graphqlTypes';
 import resolvers from './resolvers';
 import { getUser } from './auth/authMethods';
+import { MongoError } from 'mongodb';
 
 dotenv.config();
 
@@ -31,7 +32,7 @@ const server = new ApolloServer({
   },
 });
 
-mongoose.connect(process.env.MONGO, {}, err => {
+mongoose.connect(process.env.MONGO || '', {}, (err: MongoError) => {
   if (err) {
     console.log('Error: ', err);
     process.exit(1);
