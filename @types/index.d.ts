@@ -84,19 +84,6 @@ declare module 'react-native-webrtc' {
     toJSON(): IceCandidate
   }
 
-  class MediaStream extends EventTarget {
-    constructor(id: any, reactTag: any)
-    addTrack(track: MediaStreamTrack): void
-    removeTrack(track: MediaStreamTrack): void
-    getTracks(): MediaStreamTrack[]
-    getTrackById(trackId: any): MediaStreamTrack
-    getAudioTracks(): MediaStreamTrack[]
-    getVideoTracks(): MediaStreamTrack[]
-    clone(): Promise<void>
-    toURL(): string
-    release(): void
-  }
-
   export interface SourceInfo {
     id: string
     label: string
@@ -105,6 +92,13 @@ declare module 'react-native-webrtc' {
   }
 
   interface MediaStreamTrackType {
+    id: string
+    kind: 'audio' | 'video'
+    _enabled: false
+    muted: boolean
+    readonly: boolean
+    readyState: string
+    remote: boolean
     _switchCamera: () => void
     applyConstraints: () => Promise<void>
     clone: () => Promise<void>
@@ -116,11 +110,43 @@ declare module 'react-native-webrtc' {
 
   export const MediaStreamTrack: MediaStreamTrackType
 
-  // class MediaStreamTrack extends EventTarget {
-  //   constructor(info: any)
-  // }
-
   interface EventTarget {}
+
+  interface MediaStream extends EventTarget {
+    readonly active: boolean
+    readonly id: string
+    _tracks: MediaStreamTrackType[]
+    reactTag: string
+    onaddtrack: ((this: MediaStream, ev: MediaStreamTrackEvent) => any) | null
+    onremovetrack: ((this: MediaStream, ev: MediaStreamTrackEvent) => any) | null
+    addTrack(track: MediaStreamTrack): void
+    clone(): MediaStream
+    getAudioTracks(): MediaStreamTrack[]
+    getTrackById(trackId: string): MediaStreamTrack | null
+    getTracks(): MediaStreamTrack[]
+    getVideoTracks(): MediaStreamTrack[]
+    removeTrack(track: MediaStreamTrack): void
+    addEventListener<K extends keyof MediaStreamEventMap>(
+      type: K,
+      listener: (this: MediaStream, ev: MediaStreamEventMap[K]) => any,
+      options?: boolean | AddEventListenerOptions,
+    ): void
+    addEventListener(
+      type: string,
+      listener: EventListenerOrEventListenerObject,
+      options?: boolean | AddEventListenerOptions,
+    ): void
+    removeEventListener<K extends keyof MediaStreamEventMap>(
+      type: K,
+      listener: (this: MediaStream, ev: MediaStreamEventMap[K]) => any,
+      options?: boolean | EventListenerOptions,
+    ): void
+    removeEventListener(
+      type: string,
+      listener: EventListenerOrEventListenerObject,
+      options?: boolean | EventListenerOptions,
+    ): void
+  }
 
   interface GetUserMediaOPTS {
     audio: boolean
