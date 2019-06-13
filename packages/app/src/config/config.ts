@@ -1,5 +1,5 @@
-export const GRAPHQL_URI = 'http://ab425167.ngrok.io/graphql'
-export const SUBSCRIPTIONS_URI = 'ws://ab425167.ngrok.io/graphql'
+export const GRAPHQL_URI = 'http://localhost:5000/graphql'
+export const SUBSCRIPTIONS_URI = 'ws://localhost:5000/graphql'
 export const iceServers = [
   { url: 'stun:stun.l.google.com:19302' },
   { url: 'stun:stun01.sipphone.com' },

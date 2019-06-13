@@ -94,8 +94,9 @@ declare module 'react-native-webrtc' {
   interface MediaStreamTrackType {
     id: string
     kind: 'audio' | 'video'
-    _enabled: false
+    _enabled: boolean
     muted: boolean
+    enabled: boolean
     readonly: boolean
     readyState: string
     remote: boolean
@@ -120,12 +121,13 @@ declare module 'react-native-webrtc' {
     onaddtrack: ((this: MediaStream, ev: MediaStreamTrackEvent) => any) | null
     onremovetrack: ((this: MediaStream, ev: MediaStreamTrackEvent) => any) | null
     addTrack(track: MediaStreamTrack): void
+    toURL(): string
     clone(): MediaStream
-    getAudioTracks(): MediaStreamTrack[]
-    getTrackById(trackId: string): MediaStreamTrack | null
-    getTracks(): MediaStreamTrack[]
-    getVideoTracks(): MediaStreamTrack[]
-    removeTrack(track: MediaStreamTrack): void
+    getAudioTracks(): MediaStreamTrackType[]
+    getTrackById(trackId: string): MediaStreamTrackType | null
+    getTracks(): MediaStreamTrackType[]
+    getVideoTracks(): MediaStreamTrackType[]
+    removeTrack(track: MediaStreamTrackType): void
     addEventListener<K extends keyof MediaStreamEventMap>(
       type: K,
       listener: (this: MediaStream, ev: MediaStreamEventMap[K]) => any,

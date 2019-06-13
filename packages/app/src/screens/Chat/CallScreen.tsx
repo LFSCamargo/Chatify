@@ -8,7 +8,9 @@ import {
   getUserMedia,
   MediaStreamTrack,
   SourceInfo,
+  MediaStream,
 } from 'react-native-webrtc'
+// import InCallManager from 'react-native-incall-manager';
 import * as Apollo from 'react-apollo-hooks'
 import { graphql, GraphqlQueryControls } from 'react-apollo'
 import styled from 'styled-components/native'
@@ -234,7 +236,7 @@ const CallScreen = (props: Props) => {
   const [localVideo, setLocalVideo] = React.useState(true)
   const [localMic, setLocalMic] = React.useState(true)
   const [peerVideo, setPeerVideo] = React.useState(true)
-  const [stream, setStream] = React.useState<any>(null)
+  const [stream, setStream] = React.useState<MediaStream | null>(null)
   const [remoteStream, setRemoteStream] = React.useState<any>(null)
   const [callState, setCallState] = React.useState<'Ringing' | 'Connecting' | 'Connected'>(
     'Ringing',
@@ -317,7 +319,7 @@ const CallScreen = (props: Props) => {
               optional: videoSourceId ? [{ sourceId: videoSourceId }] : [],
             },
           },
-          receivedStream => {
+          (receivedStream: any) => {
             setStream(receivedStream)
             pc.addStream(receivedStream)
           },
@@ -428,12 +430,51 @@ const CallScreen = (props: Props) => {
     }
   }, [loading])
 
+  const muteMicrophone = () => {
+    console.log(pc)
+    console.log(pc.getLocalStreams())
+    if (!stream) {
+      return
+    }
+
+    stream.getAudioTracks().forEach(track => {
+      console.log('Track', track)
+      setLocalMic(!localMic)
+      track.enabled = !localMic
+    })
+  }
+
+  const sendVideoState = async (videoState: boolean) => {
+    await mutation({
+      variables: {
+        id: idx(props.navigation.state.params, _ => _.chatId),
+        callID: idx(props.navigation.state.params, _ => _.callID),
+        message: 'Change Camera State',
+        type: videoState ? CALL_TYPES.ENABLE_CAMERA : CALL_TYPES.DISABLE_CAMERA,
+      } as SendRTCMessageVariables,
+    })
+      .then(() => console.log('MANDOU SDP'))
+      .catch(() => {
+        Alert.alert('Error', 'An Unexpected Error Occurred')
+      })
+  }
+
+  const muteVideo = () => {
+    console.log(pc)
+    if (!stream) {
+      return
+    }
+
+    stream.getVideoTracks().forEach(track => {
+      setLocalVideo(!localVideo)
+      sendVideoState(!localVideo)
+      track.enabled = !localVideo
+    })
+  }
+
   pc.onaddstream = (event: any) => {
-    console.log('RECEBEU STREAM', event)
-    console.log('Stream Local Recebida', stream)
-    setRemoteStream(event.stream)
     setCallState('Connected')
-    console.log('Peer Connection', pc)
+    setRemoteStream(event.stream)
   }
 
   if (loading) {
@@ -458,32 +499,32 @@ const CallScreen = (props: Props) => {
 
   return (
     <Wrapper>
-      {!remoteStream || !localVideo ? (
+      {!remoteStream || !peerVideo ? (
         <PeerVideoPlaceHolder>
           <WrapperImageAndName>
             <UserProfile
               source={{ uri: gravatarURL(props.navigation.getParam('callUserEmail')) }}
             />
-            <ChatifyState>{callState === 'Connected' ? 'Video Disabled' : callState}</ChatifyState>
+            <ChatifyState>{peerVideo ? callState : `Video Disabled`}</ChatifyState>
             <ChatifyUser>{props.navigation.getParam('callUser')}</ChatifyUser>
           </WrapperImageAndName>
         </PeerVideoPlaceHolder>
       ) : (
         <PeerVideo mirror streamURL={remoteStream.toURL()} />
       )}
-      {!stream || !peerVideo ? (
+      {!stream || !localVideo ? (
         <LocalVideoPlaceHolder />
       ) : (
         <LocalVideo mirror streamURL={stream.toURL()} />
       )}
       <ButtonsContainer>
-        <ActionButtons onPress={() => setLocalVideo(!localVideo)}>
+        <ActionButtons onPress={() => muteVideo()}>
           <Icon source={localVideo ? Theme.images.video : Theme.images.videoOff} />
         </ActionButtons>
         <HangupButton onPress={() => hangupCall()}>
           <CallIcon />
         </HangupButton>
-        <ActionButtons onPress={() => setLocalMic(!localMic)}>
+        <ActionButtons onPress={() => muteMicrophone()}>
           <Icon source={localMic ? Theme.images.mic : Theme.images.micOff} />
         </ActionButtons>
       </ButtonsContainer>
