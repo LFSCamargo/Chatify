@@ -309,8 +309,8 @@ const CallScreen = (props: Props) => {
             audio: true,
             video: {
               mandatory: {
-                minWidth: 500,
-                minHeight: 300,
+                minWidth: 1280,
+                minHeight: 720,
                 minFrameRate: 30,
               },
               facingMode: 'user',
@@ -420,19 +420,21 @@ const CallScreen = (props: Props) => {
             }
           }
 
-          pc.onaddstream = (event: any) => {
-            console.log('RECEBEU STREAM', event)
-            setRemoteStream(event.stream)
-            setCallState('Connected')
-          }
-
           pc.oniceconnectionstatechange = () => {
             console.log('Ice Connection State', pc.iceConnectionState)
           }
-        })
-      }, 2000)
+        }, 2000)
+      })
     }
   }, [loading])
+
+  pc.onaddstream = (event: any) => {
+    console.log('RECEBEU STREAM', event)
+    console.log('Stream Local Recebida', stream)
+    setRemoteStream(event.stream)
+    setCallState('Connected')
+    console.log('Peer Connection', pc)
+  }
 
   if (loading) {
     return (
