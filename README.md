@@ -18,6 +18,10 @@ Also im preparing a blog Post to show you guys the processes and the troubles th
 4. Start packager `yarn app:start`
 5. Run on ios or android `yarn app:ios` or `yarn app:android`
 
+### PS: You need to have mongo installed on your machine
+
+### PPS: Android device or AVD must be running so reat native will be able to find the device to deal with the installation
+
 # To test the video calls you need two devices and ngrok to expose the server to the devices!
 
 ## PPS: Run the server and the packager before all those steps above
@@ -44,10 +48,6 @@ export const SUBSCRIPTIONS_URI = 'ws://something.ngrok.io/graphql'
 3. Build on the device using XCode
 
 4. And test the video calls ❤️
-
-### PS: You need to have mongo installed on your machine
-
-### PPS: Android device or AVD must be running so reat native will be able to find the device to deal with the installation
 
 # Main Libraries Used to do the dirty job
 
