@@ -1,0 +1,40 @@
+{
+  "name": "@chatify/web",
+  "version": "1.0.0",
+  "description": "Simple boilerplate using TS and Webpack and React",
+  "main": "src/index.tsx",
+  "author": "LFSCamargo",
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "start": "webpack-dev-server --open --hot --config ./webpack.config.ts",
+    "build": "webpack --mode production"
+  },
+  "devDependencies": {
+    "@types/react-router": "^4.4.5",
+    "@types/react-router-dom": "^4.3.1",
+    "@types/styled-components": "^4.1.12",
+    "@types/webpack": "^4.4.32",
+    "html-webpack-plugin": "^3.2.0",
+    "ts-loader": "^5.3.3",
+    "ts-node": "^8.0.3",
+    "tslib": "^1.9.3",
+    "tslint": "^5.14.0",
+    "tslint-config-airbnb": "^5.11.1",
+    "tslint-react": "^4.0.0",
+    "typescript": "^3.3.4000",
+    "webpack": "^4.29.6",
+    "webpack-cli": "^3.3.0",
+    "webpack-dev-server": "^3.2.1"
+  },
+  "dependencies": {
+    "@types/html-webpack-plugin": "^3.2.0",
+    "@types/react": "^16.8.10",
+    "@types/react-dom": "^16.8.3",
+    "react": "^16.8.5",
+    "react-dom": "^16.8.5",
+    "react-router": "^5.0.0",
+    "react-router-dom": "^5.0.0",
+    "styled-components": "^4.2.0"
+  }
+}
