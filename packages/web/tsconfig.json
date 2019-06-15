@@ -16,8 +16,8 @@
     "importHelpers": true,
     "allowSyntheticDefaultImports": true,
     "strictNullChecks": true,
-    "suppressImplicitAnyIndexErrors": true,
-    "noUnusedLocals": true
+    "suppressImplicitAnyIndexErrors": false,
+    "noUnusedLocals": false
   },
   "exclude": [
     "./webpack.config.ts",

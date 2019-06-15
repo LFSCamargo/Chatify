@@ -17,6 +17,9 @@
       }
     ],
     "variable-name": false,
+    "import-name": false,
+    "align": false,
+    "jsx-no-lambda": false,
     "max-line-length": [
       true,
       120

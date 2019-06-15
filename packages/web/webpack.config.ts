@@ -8,14 +8,21 @@ const config: Webpack.Configuration = {
     extensions: ['.ts', '.tsx', '.js'],
   },
   output: {
-    path: path.join(__dirname, '/dist'),
+    path: path.join(__dirname, '/build'),
     filename: 'bundle.min.js',
   },
   module: {
     rules: [
       {
-        test: /\.tsx?$/,
-        loader: 'ts-loader',
+        test: /\.ts|\.tsx$/,
+        exclude: path.resolve(__dirname, 'node_modules'),
+        include: path.resolve(__dirname, 'src'),
+        use: 'ts-loader',
+      },
+      {
+        test: /\.mjs$/,
+        include: /node_modules/,
+        type: 'javascript/auto',
       },
     ],
   },
