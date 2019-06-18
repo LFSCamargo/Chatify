@@ -20,6 +20,7 @@ export default gql`
   }
   type ChatConnectionOutput {
     count: Int
+    totalItems: Int
     edges: [Chat]
   }
 `;
