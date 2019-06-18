@@ -1,8 +1,7 @@
-import * as Webpack from 'webpack';
 const path = require('path');
 const htmlWebpackPlugin = require('html-webpack-plugin');
 
-const config: Webpack.Configuration = {
+const config = {
   entry: './src/index.tsx',
   resolve: {
     extensions: ['.ts', '.tsx', '.js'],
@@ -10,6 +9,10 @@ const config: Webpack.Configuration = {
   output: {
     path: path.join(__dirname, '/build'),
     filename: 'bundle.min.js',
+    publicPath: '/',
+  },
+  devServer: {
+    historyApiFallback: true,
   },
   module: {
     rules: [

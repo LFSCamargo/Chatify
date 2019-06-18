@@ -8,7 +8,7 @@
     "allowJs": true,
     "jsx": "react",
     "moduleResolution": "node",
-    "rootDir": "./src",
+    "rootDir": ".",
     "forceConsistentCasingInFileNames": true,
     "noImplicitReturns": true,
     "noImplicitThis": true,
@@ -17,7 +17,12 @@
     "allowSyntheticDefaultImports": true,
     "strictNullChecks": true,
     "suppressImplicitAnyIndexErrors": false,
-    "noUnusedLocals": false
+    "noUnusedLocals": false,
+    "typeRoots": [
+      /* List of folders to include type definitions from. */
+      "@types",
+      "../../../@types"
+    ],
   },
   "exclude": [
     "./webpack.config.ts",
