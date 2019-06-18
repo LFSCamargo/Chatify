@@ -12,7 +12,6 @@
     "xcode": "open ios/$npm_package_name.xcodeproj",
     "ios": "react-native run-ios",
     "update-schema": "cd data && apollo-codegen introspect-schema http://localhost:5000 --output schema.json",
-    "postinstall": "yarn codegen",
     "codegen": "apollo codegen:generate --localSchemaFile=data/schema.json --target=typescript && rm -rf __generated__",
     "codegen:watch": "apollo codegen:generate --localSchemaFile=data/schema.json --target=typescript --watch && rm -rf __generated__"
   },

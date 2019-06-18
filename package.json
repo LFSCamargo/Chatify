@@ -27,6 +27,9 @@
       "pre-commit": "yarn precommit"
     }
   },
+  "resolutions": {
+    "graphql": "14.0.2"
+  },
   "scripts": {
     "precommit": "lint-staged",
     "server:dev": "yarn workspace @chatify/server dev",
@@ -39,9 +42,12 @@
     "app:android": "yarn workspace @chatify/app android",
     "app:start": "yarn workspace @chatify/app start",
     "app:xcode": "yarn workspace @chatify/app xcode",
-    "app:studio": "yarn workspace @chatify/app studio"
+    "app:studio": "yarn workspace @chatify/app studio",
+    "web:start": "yarn workspace @chatify/web start",
+    "web:codegen": "yarn workspace @chatify/web codegen"
   },
   "dependencies": {
+    "idx": "^2.5.6",
     "rimraf": "^2.6.3",
     "tslint-plugin-graphql": "^0.0.6"
   }
