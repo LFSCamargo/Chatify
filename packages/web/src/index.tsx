@@ -1,10 +1,11 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { createGlobalStyle, ThemeProvider } from 'styled-components';
+import styled, { createGlobalStyle, ThemeProvider } from 'styled-components';
 import { ApolloProvider } from 'react-apollo';
 import { ApolloProvider as ApolloHooksProvider } from 'react-apollo-hooks';
 import Router from './routes/Router';
 import client from './config/client';
+import Loading from './pages/components/Loading';
 
 const GlobalStyle = createGlobalStyle`
   @import url('https://fonts.googleapis.com/css?family=Rubik:100,200,300,400,500,600,700,800,900');
@@ -15,6 +16,15 @@ const GlobalStyle = createGlobalStyle`
     margin-top: 0px;
     margin: 0px;
   }
+`;
+
+const AlignAtCenter = styled.div`
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  background-color: #212430;
+  justify-content: center;
 `;
 
 export interface ThemeInterface {
@@ -54,10 +64,12 @@ const Theme: ThemeInterface = {
 const Root = () => {
   const [selectedUserId, setSelectedUser] = React.useState<string>('');
   const [token, setToken] = React.useState<string | null>(null);
+  const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
     const localToken = localStorage.getItem('token');
     setToken(localToken);
+    setTimeout(() => setLoading(false), 1000);
   }, []);
 
   React.useEffect(() => {
@@ -74,7 +86,13 @@ const Root = () => {
             <ApolloHooksProvider client={client}>
               <div>
                 <GlobalStyle />
-                <Router token={token} />
+                {loading ? (
+                  <AlignAtCenter>
+                    <Loading />
+                  </AlignAtCenter>
+                ) : (
+                  <Router token={token} />
+                )}
               </div>
             </ApolloHooksProvider>
           </ApolloProvider>

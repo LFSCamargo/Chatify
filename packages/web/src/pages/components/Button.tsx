@@ -4,6 +4,7 @@ const Button = styled.button`
   margin-right: 40px;
   min-width: 100px;
   height: 50px;
+  padding: 0px 20px;
   background-color: ${({ theme }) => theme.accent};
   color: white;
   text-align: center;
