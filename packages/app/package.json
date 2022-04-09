@@ -33,7 +33,7 @@
     "graphql-tag": "^2.10.0",
     "gravatar": "^1.8.0",
     "idx": "^2.5.2",
-    "moment": "^2.22.2",
+    "moment": "^2.29.2",
     "ramda": "^0.26.1",
     "react": "16.8.0",
     "react-apollo": "^2.3.2",
