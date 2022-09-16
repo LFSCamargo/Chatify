@@ -91,15 +91,6 @@ export const SUBSCRIPTIONS_URI = 'ws://something.ngrok.io/graphql'
          </a>
       </td>
       <td align="center">
-         <a href="https://github.com/jaburcodes">
-         <img src="https://avatars1.githubusercontent.com/u/13947203?s=460&v=4" width="100px;" alt="Jabur"/>
-         <br />
-         <sub>
-         <b>Guilherme Jabur</b>
-         </esub>
-         </a>
-      </td>
-      <td align="center">
          <a href="https://github.com/Thomazella">
          <img src="https://avatars0.githubusercontent.com/u/15015324?s=460&v=4" width="100px;" alt="Thom"/>
          <br />
