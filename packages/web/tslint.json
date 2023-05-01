@@ -1,0 +1,33 @@
+{
+  "extends": [
+    "tslint-react",
+    "tslint-config-airbnb"
+  ],
+  "rules": {
+    "quotemark": [
+      true,
+      "single",
+      "jsx-double"
+    ],
+    "trailing-comma": [
+      true,
+      {
+        "multiline": "always",
+        "singleline": "never"
+      }
+    ],
+    "variable-name": false,
+    "jsx-no-multiline-js": false,
+    "ter-arrow-parens": false,
+    "object-shorthand-properties-first": false,
+    "jsx-wrap-multiline": false,
+    "ter-indent": false,
+    "import-name": false,
+    "align": false,
+    "jsx-no-lambda": false,
+    "max-line-length": [
+      true,
+      120
+    ]
+  }
+}

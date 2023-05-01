@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "outDir": "build/dist",
+    "module": "esnext",
+    "target": "es5",
+    "lib": ["es6", "dom", "esnext.asynciterable"],
+    "sourceMap": true,
+    "allowJs": true,
+    "jsx": "react",
+    "moduleResolution": "node",
+    "rootDir": ".",
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noImplicitAny": true,
+    "importHelpers": true,
+    "allowSyntheticDefaultImports": true,
+    "strictNullChecks": true,
+    "suppressImplicitAnyIndexErrors": false,
+    "noUnusedLocals": false,
+    "typeRoots": [
+      /* List of folders to include type definitions from. */
+      "@types",
+      "../../../@types"
+    ],
+  },
+  "exclude": [
+    "./webpack.config.ts",
+    "node_modules/",
+    "**/*.spec.ts"
+  ],
+}

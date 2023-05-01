@@ -16,7 +16,7 @@
     "tslint-react": "^3.6.0"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
+    "*.{ts,tsx}": [
       "prettier --write",
       "tslint --fix",
       "git add"
@@ -26,6 +26,9 @@
     "hooks": {
       "pre-commit": "yarn precommit"
     }
+  },
+  "resolutions": {
+    "graphql": "14.0.2"
   },
   "scripts": {
     "precommit": "lint-staged",
@@ -39,9 +42,15 @@
     "app:android": "yarn workspace @chatify/app android",
     "app:start": "yarn workspace @chatify/app start",
     "app:xcode": "yarn workspace @chatify/app xcode",
-    "app:studio": "yarn workspace @chatify/app studio"
+    "app:studio": "yarn workspace @chatify/app studio",
+    "web:start": "yarn workspace @chatify/web start",
+    "web:codegen": "yarn workspace @chatify/web codegen",
+    "web:update:schema": "yarn workspace @chatify/web update-schema"
   },
   "dependencies": {
+    "@types/moment": "^2.13.0",
+    "idx": "^2.5.6",
+    "moment": "^2.24.0",
     "rimraf": "^2.6.3",
     "tslint-plugin-graphql": "^0.0.6"
   }

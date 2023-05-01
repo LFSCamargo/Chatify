@@ -8,6 +8,10 @@ import { MongoError } from 'mongodb';
 
 dotenv.config();
 
+mongoose.Types.ObjectId.prototype.valueOf = function() {
+  return this.toString();
+};
+
 const pubsub = new PubSub();
 
 const server = new ApolloServer({
